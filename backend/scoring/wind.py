@@ -73,8 +73,14 @@ def score_gust_factor(wind_kn: float, gust_kn: float) -> Tuple[float, str]:
     if gust_factor <= 1.2:
         return 0.0, ""
     elif gust_factor <= 1.35:
-        return -5.0, f"Rachas moderadas ({gust_kn:.1f} kn)"
+        penalty = -5.0
+        flag = f"Rachas moderadas ({gust_kn:.1f} kn)" if gust_kn >= 15.0 else ""
+        return penalty, flag
     elif gust_factor <= 1.5:
-        return -10.0, f"Rachas elevadas ({gust_kn:.1f} kn)"
+        penalty = -10.0
+        flag = f"Rachas elevadas ({gust_kn:.1f} kn)" if gust_kn >= 15.0 else ""
+        return penalty, flag
     else:
-        return -20.0, f"Rachas muy fuertes ({gust_kn:.1f} kn)"
+        penalty = -20.0
+        flag = f"Rachas muy fuertes ({gust_kn:.1f} kn)" if gust_kn >= 15.0 else ""
+        return penalty, flag
