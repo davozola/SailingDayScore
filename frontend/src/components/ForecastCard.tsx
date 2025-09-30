@@ -51,7 +51,7 @@ export default function ForecastCard({ window, useKnots }: ForecastCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow min-w-[320px]">
       <div className="flex justify-between items-start mb-4">
         <div>
           <div className="text-xs text-gray-500">{formatDate(window.time)}</div>

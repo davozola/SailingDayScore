@@ -128,9 +128,9 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
         elif score_clamped >= 60:
             label = "Bueno"
         elif score_clamped >= 50:
-            label = "Aceptable con cautela"
+            label = "Aceptable"
         else:  # score_clamped >= 40
-            label = "A valorar con experiencia"
+            label = "A valorar"
     
     reasons = reasons[:3]
     
