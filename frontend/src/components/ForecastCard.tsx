@@ -36,6 +36,20 @@ export default function ForecastCard({ window, useKnots }: ForecastCardProps) {
     return `${(kn * 0.514444).toFixed(1)} m/s`;
   };
 
+  const getBriefReason = () => {
+    const wind = window.raw.wind_kn;
+    const gust = window.raw.gust_kn;
+    const wave = window.raw.wave_hs_m || 0;
+    const gustFactor = wind > 0 ? gust / wind : 1;
+
+    if (wave > 2.0) return 'Mar agitado';
+    if (gustFactor > 2.0) return 'Rachas fuertes';
+    if (wind < 5) return 'Viento flojo';
+    if (wind >= 10 && wind <= 20 && wave <= 1.5) return 'Condiciones ideales';
+    if (wind > 25) return 'Viento fuerte';
+    return 'Condiciones moderadas';
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-4">
@@ -54,25 +68,9 @@ export default function ForecastCard({ window, useKnots }: ForecastCardProps) {
         </div>
       </div>
 
-      <div className="mb-4 space-y-1">
-        {window.reasons.map((reason, idx) => (
-          <div key={idx} className="text-sm text-gray-700 flex items-start">
-            <span className="mr-2">•</span>
-            <span>{reason}</span>
-          </div>
-        ))}
+      <div className="mb-4 text-sm text-gray-600">
+        {getBriefReason()}
       </div>
-
-      {window.flags.length > 0 && (
-        <div className="mb-4 space-y-1">
-          {window.flags.map((flag, idx) => (
-            <div key={idx} className="text-sm text-orange-600 flex items-start">
-              <span className="mr-2">⚠</span>
-              <span>{flag}</span>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div className="bg-gray-50 rounded p-2">

@@ -30,6 +30,20 @@ export default function BestWindow({ window, useKnots }: BestWindowProps) {
     return `${(kn * 0.514444).toFixed(1)} m/s`;
   };
 
+  const getBriefReason = () => {
+    const wind = window.raw.wind_kn;
+    const gust = window.raw.gust_kn;
+    const wave = window.raw.wave_hs_m || 0;
+    const gustFactor = wind > 0 ? gust / wind : 1;
+
+    if (wave > 2.0) return 'Mar agitado';
+    if (gustFactor > 2.0) return 'Rachas fuertes';
+    if (wind < 5) return 'Viento flojo';
+    if (wind >= 10 && wind <= 20 && wave <= 1.5) return 'Condiciones ideales';
+    if (wind > 25) return 'Viento fuerte';
+    return 'Condiciones moderadas';
+  };
+
   return (
     <div className={`border-4 rounded-xl p-6 mb-6 ${getScoreColor(window.score)}`}>
       <div className="flex items-center mb-4">
@@ -41,13 +55,8 @@ export default function BestWindow({ window, useKnots }: BestWindowProps) {
         <div>
           <div className="text-lg font-semibold mb-2">{formatTime(window.time)}</div>
           <div className="text-3xl font-bold mb-2">{window.label}</div>
-          <div className="space-y-1">
-            {window.reasons.map((reason, idx) => (
-              <div key={idx} className="text-sm flex items-start">
-                <span className="mr-2">✓</span>
-                <span>{reason}</span>
-              </div>
-            ))}
+          <div className="text-sm text-gray-600">
+            {getBriefReason()}
           </div>
         </div>
         
