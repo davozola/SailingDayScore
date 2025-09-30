@@ -4,9 +4,11 @@ interface DetailModalProps {
   window: WindowScore | null;
   onClose: () => void;
   useKnots: boolean;
+  boatType?: string;
+  skill?: string;
 }
 
-export default function DetailModal({ window, onClose, useKnots }: DetailModalProps) {
+export default function DetailModal({ window, onClose, useKnots, boatType, skill }: DetailModalProps) {
   if (!window) return null;
 
   const getScoreColor = (score: number) => {
@@ -33,6 +35,63 @@ export default function DetailModal({ window, onClose, useKnots }: DetailModalPr
     return `${(kn * 0.514444).toFixed(1)} m/s`;
   };
 
+  const getContextualDescription = () => {
+    if (!boatType || !skill) return null;
+
+    const boatNames: { [key: string]: string } = {
+      'vela_ligera': 'vela ligera',
+      'cruiser_35': 'crucero menor de 35 pies',
+      'cruiser_35_45': 'crucero de 35-45 pies',
+      'catamaran': 'catamarán',
+      'dinghy': 'dinghy',
+      'windsurf': 'windsurf/wingfoil'
+    };
+
+    const skillNames: { [key: string]: string } = {
+      'principiante': 'principiante',
+      'intermedio': 'intermedio',
+      'avanzado': 'avanzado'
+    };
+
+    const boatName = boatNames[boatType] || 'embarcación';
+    const skillName = skillNames[skill] || 'navegante';
+    const score = window.score;
+
+    if (score >= 80) {
+      if (skill === 'principiante') {
+        return `Condiciones excelentes para tu ${boatName}. Como navegante ${skillName}, encontrarás condiciones muy favorables y seguras para disfrutar de una jornada en el agua.`;
+      } else if (skill === 'intermedio') {
+        return `Condiciones ideales para tu ${boatName}. Perfecto para aprovechar al máximo la navegación con tu nivel de experiencia.`;
+      } else {
+        return `Excelente ventana para tu ${boatName}. Condiciones óptimas que te permitirán sacar el máximo rendimiento.`;
+      }
+    } else if (score >= 60) {
+      if (skill === 'principiante') {
+        return `Buenas condiciones para tu ${boatName}. Como navegante ${skillName}, deberías sentirte cómodo navegando, aunque conviene estar atento a los cambios.`;
+      } else if (skill === 'intermedio') {
+        return `Condiciones apropiadas para tu ${boatName}. Tu experiencia te permitirá gestionar bien estas condiciones.`;
+      } else {
+        return `Buenas condiciones para tu ${boatName}. Sin complicaciones significativas para tu nivel de experiencia.`;
+      }
+    } else if (score >= 40) {
+      if (skill === 'principiante') {
+        return `Condiciones límite para tu ${boatName}. Como navegante ${skillName}, considera posponer la salida o navegar cerca de puerto con compañía experimentada.`;
+      } else if (skill === 'intermedio') {
+        return `Condiciones exigentes para tu ${boatName}. Requieren atención y estar preparado para gestionar situaciones complejas.`;
+      } else {
+        return `Condiciones desafiantes para tu ${boatName}. Tu experiencia será clave para evaluar si procede la salida.`;
+      }
+    } else {
+      if (skill === 'principiante') {
+        return `Condiciones no recomendables para tu ${boatName}. Como navegante ${skillName}, es muy aconsejable posponer la salida.`;
+      } else if (skill === 'intermedio') {
+        return `Condiciones adversas para tu ${boatName}. Se recomienda no navegar excepto en caso de necesidad.`;
+      } else {
+        return `Condiciones muy adversas para tu ${boatName}. Navegación no recomendable.`;
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -53,6 +112,14 @@ export default function DetailModal({ window, onClose, useKnots }: DetailModalPr
               ×
             </button>
           </div>
+
+          {getContextualDescription() && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {getContextualDescription()}
+              </p>
+            </div>
+          )}
 
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Condiciones</h3>

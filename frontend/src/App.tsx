@@ -280,6 +280,8 @@ function App() {
         window={selectedWindow}
         onClose={() => setSelectedWindow(null)}
         useKnots={useKnots}
+        boatType={boatType}
+        skill={skill}
       />
     </div>
   );

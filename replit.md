@@ -13,6 +13,13 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Added contextual descriptions in detail modal**: Personalized guidance based on boat type and skill level
+  - Smart recommendations tailored to user's experience (principiante/intermedio/avanzado)
+  - Boat-specific advice for different vessel types (vela ligera, crucero, catamarán, etc.)
+  - Score-based messaging adjusts from encouraging (80+) to cautionary (<40)
+  - Displayed in blue info box between score and conditions sections
+- ✅ **Simplified scoring labels**: "A valorar" (was "A valorar con experiencia"), "Aceptable" (was "Aceptable con cautela")
+- ✅ **Consistent card widths**: ForecastCard components now have uniform 320px minimum width
 - ✅ **Redesigned UI with minimalist aesthetic**: Clean, professional look with subtle colors and improved spacing
   - Header simplified: Smaller title (text-3xl), left-aligned, no emoji
   - Background changed to lighter shade (#fafafa) for softer appearance
