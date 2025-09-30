@@ -13,6 +13,12 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Configured production deployment**: Ready for autoscale deployment with optimized configuration
+  - Backend serves frontend static files using FastAPI StaticFiles (single server architecture)
+  - Build command: `npm run build` compiles frontend to `dist/` directory
+  - Run command: Uvicorn without --reload flag for production stability on port 5000
+  - Security: Path traversal protection using `os.path.commonpath()` validation
+  - Deployment target: autoscale (stateless web application that scales with traffic)
 - ✅ **Fixed wave height scoring inconsistencies**: Ensured smaller waves always score better than larger waves
   - Added graduated wave height bonus: +8 pts at 0m scaling to 0 at optimal (0.3m now scores better than 0.7m)
   - Implemented aggressive period bonus scaling: full bonus for ≤0.4m waves, reduces to 40% at 1.5m+ waves
