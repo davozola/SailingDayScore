@@ -39,7 +39,7 @@ export default function DetailModal({ window, onClose, useKnots, boatType, skill
     if (!boatType || !skill) return null;
 
     const boatNames: { [key: string]: string } = {
-      'dinghy': 'dinghy',
+      'dinghy': 'vela ligera/dinghy',
       'catamaran_ligero': 'catamarán ligero',
       'velero_pequeno': 'velero pequeño',
       'velero_medio': 'velero medio',
