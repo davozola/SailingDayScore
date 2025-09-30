@@ -12,6 +12,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (September 30, 2025)
 
+### Latest Updates
+- ✅ Simplified forecast card UI: 2-3 word brief reasons ("Condiciones ideales", "Mar agitado", "Viento flojo") below score
+- ✅ Removed detailed reasons and warning flags blocks for cleaner interface
+- ✅ Enhanced scoring algorithm: 75 base points for optimal wind (up from 60), steeper degradation for light winds (-5/kn vs -3/kn)
+- ✅ Reduced gust penalties by 50% when wind is in optimal range for more accurate scoring
+- ✅ Improved swell bonuses: Tp ≥8s now +10 points, +15 total with low waves (≤1.5m)
+
+### Earlier Implementation
 - ✅ Implemented complete backend with FastAPI (Pydantic models, Open-Meteo services, scoring algorithm)
 - ✅ Created modular scoring system with wind/wave matrices and no_go safety thresholds
 - ✅ Built React + Vite + Tailwind frontend with responsive design in Spanish
@@ -45,10 +53,13 @@ This separation allows independent development and deployment of frontend and ba
 - `tests/` - Pytest-based unit tests for scoring algorithms
 
 **Scoring Algorithm Design**: Multi-factor scoring system that:
-- Starts with a base score of 60 points for optimal wind conditions
-- Applies penalties/bonuses for: wind gusts, wave height, wave period, wave/wind direction alignment, precipitation, temperature
+- Starts with a base score of 75 points for optimal wind conditions
+- Applies steeper degradation for light winds (-5/kn) and moderate for strong winds (-4/kn)
+- Reduces gust penalties by 50% when wind is in optimal range (contextual evaluation)
+- Enhanced swell bonuses: Tp ≥8s +10 points, +15 total with low waves (≤1.5m)
+- Applies penalties/bonuses for: wave height, wave/wind direction alignment, precipitation, temperature
 - Implements skill-based "no-go" thresholds that prevent dangerous sailing conditions
-- Returns structured scores with human-readable reasons and safety flags
+- Returns structured scores with brief qualitative reasons (2-3 words)
 
 **Caching Strategy**: Simple in-memory cache with TTL
 - Cache key: `"{lat}_{lon}_{date}"` (rounded to 2 decimals)
