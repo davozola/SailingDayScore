@@ -29,10 +29,24 @@ export default function TimeSlot({ window, onClick }: TimeSlotProps) {
     });
   };
 
+  const getBriefReason = () => {
+    const wind = window.raw.wind_kn;
+    const gust = window.raw.gust_kn;
+    const wave = window.raw.wave_hs_m || 0;
+    const gustFactor = wind > 0 ? gust / wind : 1;
+
+    if (wave > 2.0) return 'Mar agitado';
+    if (gustFactor > 2.0) return 'Rachas fuertes';
+    if (wind < 5) return 'Viento flojo';
+    if (wind >= 10 && wind <= 20 && wave <= 1.5) return 'Condiciones ideales';
+    if (wind > 25) return 'Viento fuerte';
+    return 'Condiciones moderadas';
+  };
+
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center p-3 rounded-lg hover:shadow-lg transition-all duration-200 hover:scale-105 bg-white border-2 border-gray-200 hover:border-gray-400 min-w-[100px]"
+      className="flex flex-col items-center p-3 rounded-lg hover:shadow-lg transition-all duration-200 hover:scale-105 bg-white border-2 border-gray-200 hover:border-gray-400 min-w-[140px]"
     >
       <div className="text-xs font-semibold text-gray-600 mb-2">
         {formatTime(window.time)}
@@ -42,15 +56,25 @@ export default function TimeSlot({ window, onClick }: TimeSlotProps) {
         {window.score}
       </div>
       
-      <div className={`text-xs font-semibold ${getScoreTextColor(window.score)}`}>
+      <div className={`text-xs font-semibold ${getScoreTextColor(window.score)} mb-1`}>
         {window.label}
       </div>
+
+      <div className="text-xs text-gray-500 mb-2">
+        {getBriefReason()}
+      </div>
       
-      {window.flags.length > 0 && (
-        <div className="text-xs text-orange-600 mt-1">
-          ⚠ {window.flags.length}
+      <div className="w-full border-t border-gray-200 pt-2 space-y-0.5">
+        <div className="text-xs text-gray-600">
+          🌬 {window.raw.wind_kn.toFixed(1)} kn
         </div>
-      )}
+        <div className="text-xs text-gray-600">
+          💨 {window.raw.gust_kn.toFixed(1)} kn
+        </div>
+        <div className="text-xs text-gray-600">
+          🌊 {(window.raw.wave_hs_m || 0).toFixed(1)} m
+        </div>
+      </div>
     </button>
   );
 }

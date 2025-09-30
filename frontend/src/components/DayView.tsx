@@ -7,7 +7,7 @@ interface DayViewProps {
   onSlotClick: (window: WindowScore) => void;
 }
 
-export default function DayView({ date, windows, onSlotClick }: DayViewProps) {
+export default function DayView({ windows, onSlotClick }: DayViewProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-ES', { 
