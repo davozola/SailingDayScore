@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from backend.models import (
     ScoreRequest, ScoreResponse, GeocodeResponse, 
     Location, WindowScore, Safety, RawMetrics
@@ -11,6 +13,7 @@ from backend.scoring.combined import create_window_score, check_no_go
 from typing import Optional, Dict, Tuple
 from datetime import datetime
 import asyncio
+import os
 
 
 app = FastAPI(title="Sailing Day Score API")
@@ -148,6 +151,30 @@ async def score(request: ScoreRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al calcular score: {str(e)}")
+
+
+FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+
+if os.path.exists(FRONTEND_DIST):
+    app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
+    
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        
+        file_path = os.path.abspath(os.path.join(FRONTEND_DIST, full_path))
+        
+        try:
+            if os.path.commonpath([FRONTEND_DIST, file_path]) != FRONTEND_DIST:
+                raise HTTPException(status_code=403, detail="Forbidden")
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Forbidden")
+        
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
 
 
 if __name__ == "__main__":
