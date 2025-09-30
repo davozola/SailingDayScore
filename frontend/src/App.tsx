@@ -7,7 +7,7 @@ import { geocode, getScore, GeocodeResult, ScoreResponse, WindowScore } from './
 
 function App() {
   const [selectedLocation, setSelectedLocation] = useState<GeocodeResult | null>(null);
-  const [boatType, setBoatType] = useState('cruiser_35_45');
+  const [boatType, setBoatType] = useState('velero_medio');
   const [skill, setSkill] = useState('intermedio');
   const [forecastData, setForecastData] = useState<ScoreResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -125,12 +125,12 @@ function App() {
                   onChange={(e) => setBoatType(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 bg-white text-sm"
                 >
-                  <option value="vela_ligera">Vela ligera</option>
-                  <option value="cruiser_35">Crucero &lt;35'</option>
-                  <option value="cruiser_35_45">Crucero 35'-45'</option>
-                  <option value="catamaran">Catamarán</option>
-                  <option value="dinghy">Dinghy</option>
-                  <option value="windsurf">Windsurf/Wingfoil</option>
+                  <option value="dinghy">Dinghy (7-15 ft)</option>
+                  <option value="catamaran_ligero">Catamarán ligero (14-20 ft)</option>
+                  <option value="velero_pequeno">Velero pequeño (20-30 ft)</option>
+                  <option value="velero_medio">Velero medio (30-40 ft)</option>
+                  <option value="velero_grande">Velero grande (40-50 ft)</option>
+                  <option value="tablas">Tablas (windsurf/wing/foil)</option>
                 </select>
               </div>
 

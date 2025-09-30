@@ -39,12 +39,12 @@ export default function DetailModal({ window, onClose, useKnots, boatType, skill
     if (!boatType || !skill) return null;
 
     const boatNames: { [key: string]: string } = {
-      'vela_ligera': 'vela ligera',
-      'cruiser_35': 'crucero menor de 35 pies',
-      'cruiser_35_45': 'crucero de 35-45 pies',
-      'catamaran': 'catamarán',
       'dinghy': 'dinghy',
-      'windsurf': 'windsurf/wingfoil'
+      'catamaran_ligero': 'catamarán ligero',
+      'velero_pequeno': 'velero pequeño',
+      'velero_medio': 'velero medio',
+      'velero_grande': 'velero grande',
+      'tablas': 'tablas (windsurf/wing/foil)'
     };
 
     const skillNames: { [key: string]: string } = {

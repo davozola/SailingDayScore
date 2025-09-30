@@ -3,35 +3,35 @@ from typing import Tuple, Dict
 
 
 WIND_MATRIX: Dict[BoatType, Dict[SkillLevel, Tuple[float, float]]] = {
-    BoatType.VELA_LIGERA: {
+    BoatType.DINGHY: {
         SkillLevel.PRINCIPIANTE: (6.0, 12.0),
         SkillLevel.INTERMEDIO: (8.0, 15.0),
         SkillLevel.AVANZADO: (10.0, 18.0)
     },
-    BoatType.CRUISER_35: {
+    BoatType.CATAMARAN_LIGERO: {
         SkillLevel.PRINCIPIANTE: (8.0, 14.0),
         SkillLevel.INTERMEDIO: (10.0, 18.0),
         SkillLevel.AVANZADO: (12.0, 22.0)
     },
-    BoatType.CRUISER_35_45: {
-        SkillLevel.PRINCIPIANTE: (8.0, 16.0),
-        SkillLevel.INTERMEDIO: (10.0, 20.0),
+    BoatType.VELERO_PEQUENO: {
+        SkillLevel.PRINCIPIANTE: (8.0, 14.0),
+        SkillLevel.INTERMEDIO: (10.0, 17.0),
+        SkillLevel.AVANZADO: (12.0, 20.0)
+    },
+    BoatType.VELERO_MEDIO: {
+        SkillLevel.PRINCIPIANTE: (10.0, 16.0),
+        SkillLevel.INTERMEDIO: (11.0, 20.0),
         SkillLevel.AVANZADO: (12.0, 24.0)
     },
-    BoatType.CATAMARAN: {
-        SkillLevel.PRINCIPIANTE: (8.0, 14.0),
-        SkillLevel.INTERMEDIO: (10.0, 18.0),
-        SkillLevel.AVANZADO: (12.0, 22.0)
+    BoatType.VELERO_GRANDE: {
+        SkillLevel.PRINCIPIANTE: (10.0, 18.0),
+        SkillLevel.INTERMEDIO: (12.0, 22.0),
+        SkillLevel.AVANZADO: (14.0, 26.0)
     },
-    BoatType.DINGHY: {
-        SkillLevel.PRINCIPIANTE: (7.0, 12.0),
-        SkillLevel.INTERMEDIO: (10.0, 16.0),
-        SkillLevel.AVANZADO: (12.0, 20.0)
-    },
-    BoatType.WINDSURF: {
-        SkillLevel.PRINCIPIANTE: (7.0, 12.0),
-        SkillLevel.INTERMEDIO: (10.0, 16.0),
-        SkillLevel.AVANZADO: (12.0, 20.0)
+    BoatType.TABLAS: {
+        SkillLevel.PRINCIPIANTE: (12.0, 20.0),
+        SkillLevel.INTERMEDIO: (15.0, 25.0),
+        SkillLevel.AVANZADO: (18.0, 30.0)
     }
 }
 

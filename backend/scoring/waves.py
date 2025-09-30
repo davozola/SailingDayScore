@@ -4,35 +4,35 @@ import math
 
 
 WAVE_MATRIX: Dict[BoatType, Dict[SkillLevel, Tuple[float, float, float]]] = {
-    BoatType.VELA_LIGERA: {
-        SkillLevel.PRINCIPIANTE: (0.6, 1.0, 1.5),
-        SkillLevel.INTERMEDIO: (0.8, 1.3, 2.0),
-        SkillLevel.AVANZADO: (1.0, 1.8, 2.5)
-    },
-    BoatType.CRUISER_35: {
-        SkillLevel.PRINCIPIANTE: (0.8, 1.5, 2.0),
-        SkillLevel.INTERMEDIO: (1.0, 2.0, 2.5),
-        SkillLevel.AVANZADO: (1.2, 2.5, 3.0)
-    },
-    BoatType.CRUISER_35_45: {
-        SkillLevel.PRINCIPIANTE: (1.0, 1.8, 2.5),
-        SkillLevel.INTERMEDIO: (1.2, 2.0, 3.0),
-        SkillLevel.AVANZADO: (1.5, 2.8, 3.5)
-    },
-    BoatType.CATAMARAN: {
-        SkillLevel.PRINCIPIANTE: (0.8, 1.5, 2.0),
-        SkillLevel.INTERMEDIO: (1.0, 2.0, 2.5),
-        SkillLevel.AVANZADO: (1.2, 2.5, 3.0)
-    },
     BoatType.DINGHY: {
-        SkillLevel.PRINCIPIANTE: (0.5, 0.8, 1.2),
-        SkillLevel.INTERMEDIO: (0.7, 1.2, 1.8),
-        SkillLevel.AVANZADO: (0.9, 1.5, 2.2)
+        SkillLevel.PRINCIPIANTE: (0.4, 0.5, 0.6),
+        SkillLevel.INTERMEDIO: (0.5, 0.7, 0.8),
+        SkillLevel.AVANZADO: (0.6, 0.8, 1.0)
     },
-    BoatType.WINDSURF: {
-        SkillLevel.PRINCIPIANTE: (0.5, 0.8, 1.2),
-        SkillLevel.INTERMEDIO: (0.7, 1.2, 1.8),
-        SkillLevel.AVANZADO: (0.9, 1.5, 2.2)
+    BoatType.CATAMARAN_LIGERO: {
+        SkillLevel.PRINCIPIANTE: (0.5, 0.6, 0.8),
+        SkillLevel.INTERMEDIO: (0.7, 1.0, 1.2),
+        SkillLevel.AVANZADO: (0.9, 1.2, 1.5)
+    },
+    BoatType.VELERO_PEQUENO: {
+        SkillLevel.PRINCIPIANTE: (0.6, 0.8, 1.0),
+        SkillLevel.INTERMEDIO: (0.8, 1.3, 1.5),
+        SkillLevel.AVANZADO: (1.0, 1.6, 2.0)
+    },
+    BoatType.VELERO_MEDIO: {
+        SkillLevel.PRINCIPIANTE: (0.8, 1.2, 1.5),
+        SkillLevel.INTERMEDIO: (1.0, 1.7, 2.0),
+        SkillLevel.AVANZADO: (1.2, 2.0, 2.5)
+    },
+    BoatType.VELERO_GRANDE: {
+        SkillLevel.PRINCIPIANTE: (1.0, 1.5, 2.0),
+        SkillLevel.INTERMEDIO: (1.3, 2.2, 2.5),
+        SkillLevel.AVANZADO: (1.5, 2.5, 3.0)
+    },
+    BoatType.TABLAS: {
+        SkillLevel.PRINCIPIANTE: (0.5, 0.6, 0.8),
+        SkillLevel.INTERMEDIO: (0.7, 1.0, 1.2),
+        SkillLevel.AVANZADO: (0.9, 1.2, 1.5)
     }
 }
 

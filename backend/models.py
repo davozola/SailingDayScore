@@ -5,12 +5,12 @@ from enum import Enum
 
 
 class BoatType(str, Enum):
-    VELA_LIGERA = "vela_ligera"
-    CRUISER_35 = "cruiser_35"
-    CRUISER_35_45 = "cruiser_35_45"
-    CATAMARAN = "catamaran"
     DINGHY = "dinghy"
-    WINDSURF = "windsurf"
+    CATAMARAN_LIGERO = "catamaran_ligero"
+    VELERO_PEQUENO = "velero_pequeno"
+    VELERO_MEDIO = "velero_medio"
+    VELERO_GRANDE = "velero_grande"
+    TABLAS = "tablas"
 
 
 class SkillLevel(str, Enum):

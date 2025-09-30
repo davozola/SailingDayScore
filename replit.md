@@ -13,9 +13,18 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Updated boat types with professional classifications**: New system based on eslora and real vessel types
+  - Dinghy (7-15 ft): Optimist, Laser, 420, 470 - Wind 6-18 kn, Waves ≤0.6-1.0m
+  - Catamarán ligero (14-20 ft): Hobie Cat, Nacra, Dart - Wind 8-22 kn, Waves ≤0.8-1.5m
+  - Velero pequeño (20-30 ft): Beneteau First 25, J/80 - Wind 8-20 kn, Waves ≤1.0-2.0m
+  - Velero medio (30-40 ft): Bavaria 34, Sun Odyssey 36 - Wind 10-24 kn, Waves ≤1.5-2.5m
+  - Velero grande (40-50 ft): Hanse 45, Jeanneau 49 - Wind 10-26 kn, Waves ≤2.0-3.0m
+  - Tablas (windsurf/wing/foil): Wind 12-30 kn, Waves ≤0.8-1.5m
+  - Updated all scoring matrices with proper wind/wave thresholds per skill level
+  - All 23 pytest tests passing with new boat types
 - ✅ **Added contextual descriptions in detail modal**: Personalized guidance based on boat type and skill level
   - Smart recommendations tailored to user's experience (principiante/intermedio/avanzado)
-  - Boat-specific advice for different vessel types (vela ligera, crucero, catamarán, etc.)
+  - Boat-specific advice for different vessel types
   - Score-based messaging adjusts from encouraging (80+) to cautionary (<40)
   - Displayed in blue info box between score and conditions sections
 - ✅ **Simplified scoring labels**: "A valorar" (was "A valorar con experiencia"), "Aceptable" (was "Aceptable con cautela")
