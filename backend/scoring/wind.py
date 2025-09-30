@@ -92,29 +92,34 @@ def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_opti
     }
     multiplier = skill_multipliers[skill]
     
-    # Si el viento está en rango óptimo, reducir penalización de rachas en 50%
+    # Si el viento está en rango óptimo, reducir penalización de rachas más agresivamente
+    # Esto permite que condiciones con viento óptimo no se penalicen tanto por rachas
     if in_optimal_range:
-        multiplier *= 0.5
+        multiplier *= 0.35  # Reducción de 65% (antes era 50%)
     
-    if gust_factor <= 1.2:
+    # Umbrales más tolerantes para rachas cuando el viento medio es bueno
+    threshold_adjust = 0.2 if in_optimal_range else 0.0
+    
+    if gust_factor <= 1.2 + threshold_adjust:
         return 0.0, ""
-    elif gust_factor <= 1.35:
+    elif gust_factor <= 1.35 + threshold_adjust:
         penalty = -5.0 * multiplier
         flag = f"Rachas moderadas +{percentage}% ({gust_kn:.1f} kn): mayor esfuerzo físico" if gust_kn >= 12.0 else ""
         return penalty, flag
-    elif gust_factor <= 1.5:
+    elif gust_factor <= 1.5 + threshold_adjust:
         penalty = -10.0 * multiplier
         flag = f"Rachas elevadas +{percentage}% ({gust_kn:.1f} kn): riesgo de orzadas y escoras bruscas" if gust_kn >= 15.0 else ""
         return penalty, flag
-    elif gust_factor <= 1.7:
+    elif gust_factor <= 1.7 + threshold_adjust:
         penalty = -15.0 * multiplier
         flag = f"Rachas muy fuertes +{percentage}% ({gust_kn:.1f} kn): velas difíciles de controlar" if gust_kn >= 18.0 and not in_optimal_range else ""
         return penalty, flag
     else:
-        penalty = -20.0 * multiplier
-        if in_optimal_range and gust_kn < 22.0:
-            # En viento óptimo con rachas controlables, no alarmar tanto
+        # Capear la penalización máxima en viento óptimo
+        if in_optimal_range:
+            penalty = min(-20.0 * multiplier, -8.0)  # Máximo -8 puntos en óptimo
             flag = f"Rachas variables +{percentage}% ({gust_kn:.1f} kn): mantenerse alerta" if gust_kn >= 18.0 else ""
         else:
+            penalty = -20.0 * multiplier
             flag = f"Rachas extremas +{percentage}% ({gust_kn:.1f} kn): alto riesgo, control muy difícil" if gust_kn >= 22.0 else ""
         return penalty, flag

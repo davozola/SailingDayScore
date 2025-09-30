@@ -55,7 +55,10 @@ def score_wave_height(hs_m: Optional[float], boat_type: BoatType, skill: SkillLe
         period_factor = 0.8  # Reduce penalización en 20% para periodos moderados
     
     if hs_m <= optimal:
-        return 0.0, f"Ola {hs_m:.1f} m (favorable)"
+        # Bonus gradual para olas más pequeñas: 0.3m mejor que 0.7m
+        # Máximo +8 puntos para olas muy pequeñas (0.2m), 0 puntos en el límite óptimo
+        bonus = 8.0 * (1.0 - hs_m / optimal)
+        return bonus, f"Ola {hs_m:.1f} m (favorable)"
     elif hs_m <= moderate:
         penalty = -25.0 * (hs_m - optimal) / (moderate - optimal) * period_factor
         label = "moderada, navegable" if tp_s and tp_s >= 7.0 else "moderada"
@@ -80,15 +83,28 @@ def score_wave_period(tp_s: Optional[float], hs_m: Optional[float] = None) -> Tu
     bonus = 0.0
     reason = ""
     
+    # Escalar el bonus por la altura de ola para evitar que periodos buenos
+    # hagan que olas altas puntúen mejor que olas bajas
+    # Factor de escala: 1.0 para olas ≤0.4m, reduce más agresivamente hasta 0.4 en 1.5m
+    scale_factor = 1.0
+    if hs_m is not None:
+        if hs_m <= 0.4:
+            scale_factor = 1.0
+        elif hs_m <= 1.5:
+            # Reducción más pronunciada: de 1.0 a 0.4
+            scale_factor = 1.0 - 0.6 * (hs_m - 0.4) / 1.1  # 1.0 → 0.4
+        else:
+            scale_factor = 0.4
+    
     if tp_s >= 8.0:
-        bonus = 10.0
+        bonus = 10.0 * scale_factor
         reason = f"Tp {tp_s:.1f} s (mar de fondo suave, muy navegable)"
         # Bonus adicional si además la ola es baja
         if hs_m and hs_m <= 1.5:
-            bonus += 5.0
+            bonus += 5.0 * scale_factor
             reason = f"Tp {tp_s:.1f} s + ola {hs_m:.1f}m (condiciones ideales)"
     elif tp_s >= 7.0:
-        bonus = 7.0
+        bonus = 7.0 * scale_factor
         reason = f"Tp {tp_s:.1f} s (mar de fondo)"
     elif tp_s < 5.0:
         bonus = -6.0

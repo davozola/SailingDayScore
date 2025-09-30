@@ -13,6 +13,16 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Fixed wave height scoring inconsistencies**: Ensured smaller waves always score better than larger waves
+  - Added graduated wave height bonus: +8 pts at 0m scaling to 0 at optimal (0.3m now scores better than 0.7m)
+  - Implemented aggressive period bonus scaling: full bonus for ≤0.4m waves, reduces to 40% at 1.5m+ waves
+  - Prevents long-period swells from making large waves score better than small waves
+  - Example: velero medio 0.3m→59 pts, 0.7m→55 pts (with same Tp=7s)
+- ✅ **Reduced gust penalties for optimal wind conditions**: Made scoring more forgiving when base wind is good
+  - Increased penalty reduction in optimal range from 50% to 65% (multiplier 0.35)
+  - Raised gust factor thresholds by +0.2 when in optimal range (allows up to 1.4x gusts penalty-free)
+  - Capped maximum gust penalty at -8 points when wind is in optimal range
+  - Principiantes with 6kn wind (optimal for dinghy) now score appropriately despite moderate gusts
 - ✅ **Fixed scoring algorithm for low wind conditions**: Adjusted penalties to allow proper score variation
   - Changed from flat -5 pts/kn to progressive: -3 pts/kn (0-3kn below optimal), -4 pts/kn (3-6kn), -5 pts/kn (6+kn)
   - Reduced minimum navigable score from 40 to 25 points to allow realistic low-wind scoring
