@@ -37,9 +37,9 @@ WAVE_MATRIX: Dict[BoatType, Dict[SkillLevel, Tuple[float, float, float]]] = {
 }
 
 
-def score_wave_height(hs_m: Optional[float], boat_type: BoatType, skill: SkillLevel) -> Tuple[float, str]:
+def score_wave_height(hs_m: Optional[float], boat_type: BoatType, skill: SkillLevel, tp_s: Optional[float] = None) -> Tuple[float, str]:
     """
-    Penaliza por altura significativa de ola.
+    Penaliza por altura significativa de ola, considerando el periodo.
     Retorna (penalización, razón)
     """
     if hs_m is None:
@@ -47,16 +47,25 @@ def score_wave_height(hs_m: Optional[float], boat_type: BoatType, skill: SkillLe
     
     optimal, moderate, limit = WAVE_MATRIX[boat_type][skill]
     
+    # Si el periodo es largo (>=7s), es mar de fondo: más navegable que mar de viento
+    period_factor = 1.0
+    if tp_s and tp_s >= 7.0:
+        period_factor = 0.6  # Reduce penalización en 40% para mar de fondo
+    elif tp_s and tp_s >= 5.5:
+        period_factor = 0.8  # Reduce penalización en 20% para periodos moderados
+    
     if hs_m <= optimal:
         return 0.0, f"Ola {hs_m:.1f} m (favorable)"
     elif hs_m <= moderate:
-        penalty = -25.0 * (hs_m - optimal) / (moderate - optimal)
-        return penalty, f"Ola {hs_m:.1f} m (moderada)"
+        penalty = -25.0 * (hs_m - optimal) / (moderate - optimal) * period_factor
+        label = "moderada, navegable" if tp_s and tp_s >= 7.0 else "moderada"
+        return penalty, f"Ola {hs_m:.1f} m ({label})"
     elif hs_m <= limit:
-        penalty = -25.0 - 15.0 * (hs_m - moderate) / (limit - moderate)
-        return penalty, f"Ola {hs_m:.1f} m (alta)"
+        penalty = (-25.0 - 15.0 * (hs_m - moderate) / (limit - moderate)) * period_factor
+        label = "alta, mar de fondo" if tp_s and tp_s >= 7.0 else "alta"
+        return penalty, f"Ola {hs_m:.1f} m ({label})"
     else:
-        return -40.0, f"Ola {hs_m:.1f} m (muy alta)"
+        return -40.0 * period_factor, f"Ola {hs_m:.1f} m (muy alta)"
 
 
 def score_wave_period(tp_s: Optional[float]) -> Tuple[float, str]:
@@ -67,10 +76,12 @@ def score_wave_period(tp_s: Optional[float]) -> Tuple[float, str]:
     if tp_s is None:
         return 0.0, ""
     
-    if tp_s >= 7.0:
+    if tp_s >= 8.0:
+        return 8.0, f"Tp {tp_s:.1f} s (mar de fondo suave, muy navegable)"
+    elif tp_s >= 7.0:
         return 5.0, f"Tp {tp_s:.1f} s (mar de fondo)"
     elif tp_s < 5.0:
-        return -6.0, f"Tp {tp_s:.1f} s (mar corto)"
+        return -6.0, f"Tp {tp_s:.1f} s (mar corto, incómodo)"
     else:
         return 0.0, ""
 

@@ -60,27 +60,40 @@ def score_wind(wind_kn: float, boat_type: BoatType, skill: SkillLevel) -> Tuple[
     return score, reason
 
 
-def score_gust_factor(wind_kn: float, gust_kn: float) -> Tuple[float, str]:
+def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel) -> Tuple[float, str]:
     """
-    Penaliza por factor de rachas.
+    Penaliza por factor de rachas según nivel de experiencia.
     Retorna (penalización, flag opcional)
     """
     if wind_kn < 1.0:
         return 0.0, ""
     
     gust_factor = gust_kn / wind_kn
+    percentage = int((gust_factor - 1.0) * 100)
+    
+    # Factores de penalización según nivel
+    skill_multipliers = {
+        SkillLevel.PRINCIPIANTE: 1.0,    # Penalización completa
+        SkillLevel.INTERMEDIO: 0.7,       # 70% de penalización
+        SkillLevel.AVANZADO: 0.4          # 40% de penalización
+    }
+    multiplier = skill_multipliers[skill]
     
     if gust_factor <= 1.2:
         return 0.0, ""
     elif gust_factor <= 1.35:
-        penalty = -5.0
-        flag = f"Rachas moderadas ({gust_kn:.1f} kn)" if gust_kn >= 15.0 else ""
+        penalty = -5.0 * multiplier
+        flag = f"Rachas moderadas +{percentage}% ({gust_kn:.1f} kn): mayor esfuerzo físico" if gust_kn >= 12.0 else ""
         return penalty, flag
     elif gust_factor <= 1.5:
-        penalty = -10.0
-        flag = f"Rachas elevadas ({gust_kn:.1f} kn)" if gust_kn >= 15.0 else ""
+        penalty = -10.0 * multiplier
+        flag = f"Rachas elevadas +{percentage}% ({gust_kn:.1f} kn): riesgo de orzadas y escoras bruscas" if gust_kn >= 15.0 else ""
+        return penalty, flag
+    elif gust_factor <= 1.7:
+        penalty = -15.0 * multiplier
+        flag = f"Rachas muy fuertes +{percentage}% ({gust_kn:.1f} kn): velas difíciles de controlar, posible daño al aparejo" if gust_kn >= 18.0 else ""
         return penalty, flag
     else:
-        penalty = -20.0
-        flag = f"Rachas muy fuertes ({gust_kn:.1f} kn)" if gust_kn >= 15.0 else ""
+        penalty = -20.0 * multiplier
+        flag = f"Rachas extremas +{percentage}% ({gust_kn:.1f} kn): alto riesgo de volcada, control muy difícil" if gust_kn >= 20.0 else ""
         return penalty, flag

@@ -65,12 +65,12 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
     total_score += wind_score
     reasons.append(wind_reason)
     
-    gust_penalty, gust_flag = score_gust_factor(metrics.wind_kn, metrics.gust_kn)
+    gust_penalty, gust_flag = score_gust_factor(metrics.wind_kn, metrics.gust_kn, skill)
     total_score += gust_penalty
     if gust_flag:
         flags.append(gust_flag)
     
-    wave_penalty, wave_reason = score_wave_height(metrics.wave_hs_m, boat_type, skill)
+    wave_penalty, wave_reason = score_wave_height(metrics.wave_hs_m, boat_type, skill, metrics.wave_tp_s)
     total_score += wave_penalty
     if wave_reason:
         reasons.append(wave_reason)
@@ -101,16 +101,31 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
     if metrics.wave_hs_m is None:
         flags.append("Sin datos de mar (estimación conservadora)")
     
-    score_clamped = max(0, min(100, int(round(total_score))))
+    # Verificar si es no-go absoluto
+    is_no_go, no_go_reasons = check_no_go(metrics, skill)
     
-    if score_clamped >= 80:
-        label = "Muy bueno"
-    elif score_clamped >= 60:
-        label = "Bueno"
-    elif score_clamped >= 40:
-        label = "Regular / con cautela"
-    else:
+    # Si es no-go absoluto, score bajo y añadir razones a flags
+    if is_no_go:
+        score_clamped = max(0, min(30, int(round(total_score))))
         label = "No recomendable"
+        # Añadir razones de no-go a flags
+        for reason in no_go_reasons:
+            flags.append(f"⚠️ NO-GO: {reason}")
+    else:
+        # Score mínimo de 40 en condiciones navegables
+        score_clamped = max(40, min(100, int(round(total_score))))
+        
+        # Labels más granulares
+        if score_clamped >= 80:
+            label = "Excelente"
+        elif score_clamped >= 70:
+            label = "Muy bueno"
+        elif score_clamped >= 60:
+            label = "Bueno"
+        elif score_clamped >= 50:
+            label = "Aceptable con cautela"
+        else:  # score_clamped >= 40
+            label = "A valorar con experiencia"
     
     reasons = reasons[:3]
     
