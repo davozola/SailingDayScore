@@ -3,12 +3,12 @@ from typing import Dict, List
 from datetime import datetime, timedelta
 
 
-async def fetch_weather_data(lat: float, lon: float, date: str, timezone: str) -> Dict:
+async def fetch_weather_data(lat: float, lon: float, date: str, timezone: str, days: int = 5) -> Dict:
     """Obtiene datos de forecast de Open-Meteo"""
     url = "https://api.open-meteo.com/v1/forecast"
     
     start_date = datetime.fromisoformat(date)
-    end_date = start_date + timedelta(days=1)
+    end_date = start_date + timedelta(days=days - 1)
     
     params = {
         "latitude": lat,

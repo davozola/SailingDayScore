@@ -3,12 +3,12 @@ from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 
 
-async def fetch_marine_data(lat: float, lon: float, date: str, timezone: str) -> Optional[Dict]:
+async def fetch_marine_data(lat: float, lon: float, date: str, timezone: str, days: int = 5) -> Optional[Dict]:
     """Obtiene datos marinos de Open-Meteo Marine API"""
     url = "https://marine-api.open-meteo.com/v1/marine"
     
     start_date = datetime.fromisoformat(date)
-    end_date = start_date + timedelta(days=1)
+    end_date = start_date + timedelta(days=days - 1)
     
     params = {
         "latitude": lat,

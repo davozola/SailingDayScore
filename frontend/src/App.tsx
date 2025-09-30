@@ -14,10 +14,40 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [useKnots, setUseKnots] = useState(true);
   const [selectedWindow, setSelectedWindow] = useState<WindowScore | null>(null);
+  const [showNightSlots, setShowNightSlots] = useState(false);
+  const [maxWind, setMaxWind] = useState(25);
+  const [maxGust, setMaxGust] = useState(35);
+  const [maxWave, setMaxWave] = useState(2.5);
 
   const handleLocationSelect = (location: GeocodeResult) => {
     setSelectedLocation(location);
     setForecastData(null);
+  };
+
+  const handleSkillChange = (newSkill: string) => {
+    setSkill(newSkill);
+    if (newSkill === 'principiante') {
+      setMaxWind(20);
+      setMaxGust(28);
+      setMaxWave(1.5);
+    } else if (newSkill === 'intermedio') {
+      setMaxWind(25);
+      setMaxGust(35);
+      setMaxWave(2.5);
+    } else {
+      setMaxWind(32);
+      setMaxGust(40);
+      setMaxWave(3.0);
+    }
+  };
+
+  const filterTimeSlots = (windows: WindowScore[]) => {
+    if (showNightSlots) return windows;
+    
+    return windows.filter(window => {
+      const hour = new Date(window.time).getHours();
+      return hour >= 8 && hour <= 21;
+    });
   };
 
   const groupWindowsByDay = (windows: WindowScore[]) => {
@@ -106,7 +136,7 @@ function App() {
                 </label>
                 <select
                   value={skill}
-                  onChange={(e) => setSkill(e.target.value)}
+                  onChange={(e) => handleSkillChange(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 >
                   <option value="principiante">Principiante</option>
@@ -116,21 +146,67 @@ function App() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <label className="text-sm font-semibold text-gray-700">Unidades:</label>
-                <button
-                  onClick={() => setUseKnots(true)}
-                  className={`px-4 py-2 rounded ${useKnots ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                >
-                  Nudos (kn)
-                </button>
-                <button
-                  onClick={() => setUseKnots(false)}
-                  className={`px-4 py-2 rounded ${!useKnots ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                >
-                  m/s
-                </button>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Límites de seguridad (personalizables)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Viento máx. (kn)</label>
+                  <input
+                    type="number"
+                    value={maxWind}
+                    onChange={(e) => setMaxWind(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Rachas máx. (kn)</label>
+                  <input
+                    type="number"
+                    value={maxGust}
+                    onChange={(e) => setMaxGust(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Ola máx. (m)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={maxWave}
+                    onChange={(e) => setMaxWave(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-semibold text-gray-700">Unidades:</label>
+                  <button
+                    onClick={() => setUseKnots(true)}
+                    className={`px-3 py-2 rounded text-sm ${useKnots ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    Nudos (kn)
+                  </button>
+                  <button
+                    onClick={() => setUseKnots(false)}
+                    className={`px-3 py-2 rounded text-sm ${!useKnots ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    m/s
+                  </button>
+                </div>
+                
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showNightSlots}
+                    onChange={(e) => setShowNightSlots(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Mostrar franjas nocturnas</span>
+                </label>
               </div>
 
               <button
@@ -174,8 +250,11 @@ function App() {
               <BestWindow window={forecastData.best_window} useKnots={useKnots} />
             )}
 
-            <h2 className="text-2xl font-bold mb-4">Previsión por días</h2>
-            {groupWindowsByDay(forecastData.windows).map(({ date, windows }) => (
+            <h2 className="text-2xl font-bold mb-4">Previsión 5 días</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              {showNightSlots ? 'Mostrando todas las franjas (24h)' : 'Mostrando franjas de 8:00 a 21:00'}
+            </p>
+            {groupWindowsByDay(filterTimeSlots(forecastData.windows)).map(({ date, windows }) => (
               <DayView
                 key={date}
                 date={date}
