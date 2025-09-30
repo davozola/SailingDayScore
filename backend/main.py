@@ -8,7 +8,7 @@ from backend.services.geocode import geocode_location
 from backend.services.openmeteo import fetch_weather_data, sample_hourly_to_3h
 from backend.services.marine import fetch_marine_data, sample_marine_to_3h
 from backend.scoring.combined import create_window_score, check_no_go
-from typing import Optional
+from typing import Optional, Dict, Tuple
 from datetime import datetime
 import asyncio
 
@@ -24,12 +24,20 @@ app.add_middleware(
 )
 
 
-CACHE = {}
-CACHE_TTL = 600
+CACHE: Dict[str, Tuple[Tuple, float]] = {}
+CACHE_TTL = 600.0
 
 
 def get_cache_key(lat: float, lon: float, date: str) -> str:
     return f"{lat:.2f}_{lon:.2f}_{date}"
+
+
+def clean_expired_cache():
+    """Limpia entradas expiradas del cache"""
+    now = datetime.now().timestamp()
+    expired_keys = [key for key, (_, timestamp) in CACHE.items() if now - timestamp >= CACHE_TTL]
+    for key in expired_keys:
+        del CACHE[key]
 
 
 @app.get("/api/health")
@@ -49,6 +57,8 @@ async def geocode(q: str = Query(..., description="Nombre de ubicación")):
 @app.post("/api/score", response_model=ScoreResponse)
 async def score(request: ScoreRequest):
     try:
+        clean_expired_cache()
+        
         cache_key = get_cache_key(request.lat, request.lon, request.date)
         now = datetime.now().timestamp()
         
