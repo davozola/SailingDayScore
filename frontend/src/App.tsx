@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import LocationSearch from './components/LocationSearch';
-import ForecastCard from './components/ForecastCard';
 import BestWindow from './components/BestWindow';
-import { geocode, getScore, GeocodeResult, ScoreResponse } from './lib/api';
+import DayView from './components/DayView';
+import DetailModal from './components/DetailModal';
+import { geocode, getScore, GeocodeResult, ScoreResponse, WindowScore } from './lib/api';
 
 function App() {
   const [selectedLocation, setSelectedLocation] = useState<GeocodeResult | null>(null);
@@ -12,10 +13,23 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useKnots, setUseKnots] = useState(true);
+  const [selectedWindow, setSelectedWindow] = useState<WindowScore | null>(null);
 
   const handleLocationSelect = (location: GeocodeResult) => {
     setSelectedLocation(location);
     setForecastData(null);
+  };
+
+  const groupWindowsByDay = (windows: WindowScore[]) => {
+    const grouped: { [key: string]: WindowScore[] } = {};
+    windows.forEach(window => {
+      const date = window.time.split('T')[0];
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(window);
+    });
+    return Object.entries(grouped).map(([date, windows]) => ({ date, windows }));
   };
 
   const handleCalculate = async () => {
@@ -160,12 +174,15 @@ function App() {
               <BestWindow window={forecastData.best_window} useKnots={useKnots} />
             )}
 
-            <h2 className="text-2xl font-bold mb-4">Previsión por franjas de 3 horas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {forecastData.windows.map((window, idx) => (
-                <ForecastCard key={idx} window={window} useKnots={useKnots} />
-              ))}
-            </div>
+            <h2 className="text-2xl font-bold mb-4">Previsión por días</h2>
+            {groupWindowsByDay(forecastData.windows).map(({ date, windows }) => (
+              <DayView
+                key={date}
+                date={date}
+                windows={windows}
+                onSlotClick={setSelectedWindow}
+              />
+            ))}
 
             <div className="mt-8 p-4 bg-blue-50 rounded-lg text-sm text-gray-700">
               <p>
@@ -184,6 +201,12 @@ function App() {
           </div>
         )}
       </div>
+
+      <DetailModal
+        window={selectedWindow}
+        onClose={() => setSelectedWindow(null)}
+        useKnots={useKnots}
+      />
     </div>
   );
 }
