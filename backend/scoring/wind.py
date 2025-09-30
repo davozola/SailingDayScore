@@ -45,24 +45,27 @@ def score_wind(wind_kn: float, boat_type: BoatType, skill: SkillLevel) -> Tuple[
     min_optimal, max_optimal = optimal_range
     
     if min_optimal <= wind_kn <= max_optimal:
-        score = 60.0
+        score = 75.0  # Condiciones óptimas
         reason = f"Viento {wind_kn:.1f} kn en rango óptimo"
     else:
         if wind_kn < min_optimal:
             delta = min_optimal - wind_kn
-            score = max(60.0 - (delta * 3.0), 30.0)
+            # Pendiente más pronunciada para vientos flojos (5 puntos por kn)
+            score = max(75.0 - (delta * 5.0), 20.0)
             reason = f"Viento {wind_kn:.1f} kn (flojo, óptimo {min_optimal:.0f}-{max_optimal:.0f} kn)"
         else:
             delta = wind_kn - max_optimal
-            score = max(60.0 - (delta * 3.0), 30.0)
+            # Pendiente moderada para vientos fuertes (4 puntos por kn)
+            score = max(75.0 - (delta * 4.0), 20.0)
             reason = f"Viento {wind_kn:.1f} kn (fuerte, óptimo {min_optimal:.0f}-{max_optimal:.0f} kn)"
     
     return score, reason
 
 
-def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel) -> Tuple[float, str]:
+def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_optimal_range: bool = False) -> Tuple[float, str]:
     """
     Penaliza por factor de rachas según nivel de experiencia.
+    Si el viento medio está en rango óptimo, las rachas penalizan menos.
     Retorna (penalización, flag opcional)
     """
     if wind_kn < 1.0:
@@ -79,6 +82,10 @@ def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel) -> Tupl
     }
     multiplier = skill_multipliers[skill]
     
+    # Si el viento está en rango óptimo, reducir penalización de rachas en 50%
+    if in_optimal_range:
+        multiplier *= 0.5
+    
     if gust_factor <= 1.2:
         return 0.0, ""
     elif gust_factor <= 1.35:
@@ -91,9 +98,13 @@ def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel) -> Tupl
         return penalty, flag
     elif gust_factor <= 1.7:
         penalty = -15.0 * multiplier
-        flag = f"Rachas muy fuertes +{percentage}% ({gust_kn:.1f} kn): velas difíciles de controlar, posible daño al aparejo" if gust_kn >= 18.0 else ""
+        flag = f"Rachas muy fuertes +{percentage}% ({gust_kn:.1f} kn): velas difíciles de controlar" if gust_kn >= 18.0 and not in_optimal_range else ""
         return penalty, flag
     else:
         penalty = -20.0 * multiplier
-        flag = f"Rachas extremas +{percentage}% ({gust_kn:.1f} kn): alto riesgo de volcada, control muy difícil" if gust_kn >= 20.0 else ""
+        if in_optimal_range and gust_kn < 22.0:
+            # En viento óptimo con rachas controlables, no alarmar tanto
+            flag = f"Rachas variables +{percentage}% ({gust_kn:.1f} kn): mantenerse alerta" if gust_kn >= 18.0 else ""
+        else:
+            flag = f"Rachas extremas +{percentage}% ({gust_kn:.1f} kn): alto riesgo, control muy difícil" if gust_kn >= 22.0 else ""
         return penalty, flag

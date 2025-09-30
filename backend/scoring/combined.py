@@ -65,7 +65,12 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
     total_score += wind_score
     reasons.append(wind_reason)
     
-    gust_penalty, gust_flag = score_gust_factor(metrics.wind_kn, metrics.gust_kn, skill)
+    # Determinar si el viento está en rango óptimo para ajustar penalización de rachas
+    from backend.scoring.wind import WIND_MATRIX
+    optimal_range = WIND_MATRIX[boat_type][skill]
+    in_optimal = optimal_range[0] <= metrics.wind_kn <= optimal_range[1]
+    
+    gust_penalty, gust_flag = score_gust_factor(metrics.wind_kn, metrics.gust_kn, skill, in_optimal)
     total_score += gust_penalty
     if gust_flag:
         flags.append(gust_flag)
@@ -75,7 +80,7 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
     if wave_reason:
         reasons.append(wave_reason)
     
-    period_adj, period_reason = score_wave_period(metrics.wave_tp_s)
+    period_adj, period_reason = score_wave_period(metrics.wave_tp_s, metrics.wave_hs_m)
     total_score += period_adj
     if period_reason:
         reasons.append(period_reason)
