@@ -59,10 +59,6 @@ localPort = 8000
 externalPort = 8000
 
 [[ports]]
-localPort = 36235
-externalPort = 3003
-
-[[ports]]
 localPort = 45877
 externalPort = 3001
 
@@ -72,5 +68,5 @@ externalPort = 3000
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["bash", "-c", "PYTHONPATH=/home/runner/workspace python -m uvicorn backend.main:app --host 0.0.0.0 --port 5000"]
-build = ["bash", "-c", "(cd /home/runner/workspace/frontend && npm install && npm run build)"]
+run = ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "5000"]
+build = ["bash", "-c", "cd frontend && npm install && npm run build"]
