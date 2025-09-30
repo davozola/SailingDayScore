@@ -1,0 +1,257 @@
+Quiero que construyas una aplicación llamada Sailing Day Score que calcule una puntuación 0–100 de lo “navegable” que está un día en función de:
+
+Ubicación (lat/lon o nombre de puerto/ciudad costera).
+
+Tipo de embarcación (vela ligera, crucero <35’, crucero 35’–45’, catamarán, dinghy, windsurf/wingfoil).
+
+Nivel del patrón/tripulación (principiante, intermedio, avanzado).
+
+Ventana temporal (hoy, mañana, +3 días) en intervalos de 3 horas.
+
+Condiciones: viento, rachas, ola significativa, periodo de ola, dirección de ola, precipitación, temperatura, visibilidad aproximada.
+
+Requisitos duros (no negociables)
+
+Stack:
+
+Backend: Python 3.11 + FastAPI (uvicorn), organizado en módulos, con tipado y Pydantic.
+
+Frontend: React + Vite + Tailwind (SPA simple).
+
+Sin claves: usa Open-Meteo:
+
+Forecast: https://api.open-meteo.com/v1/forecast
+
+Marine: https://marine-api.open-meteo.com/v1/marine
+
+Geocoding (gratuito): https://geocoding-api.open-meteo.com/v1/search
+
+Tests: pytest para lógica de scoring.
+
+Endpoints backend:
+
+GET /api/health → {status:"ok"}
+
+GET /api/geocode?q=BARCELONA → devuelve top 5 lugares (usa Open-Meteo geocoding).
+
+POST /api/score → body JSON:
+
+{
+  "lat": 41.34,
+  "lon": 2.16,
+  "boat_type": "cruiser_35_45",
+  "skill": "intermediate",
+  "date": "2025-09-30",
+  "timezone": "Europe/Madrid"
+}
+
+
+Respuesta:
+
+{
+  "location": {"name":"Barcelona","lat":41.34,"lon":2.16},
+  "windows": [
+    {
+      "time":"2025-09-30T12:00:00+02:00",
+      "score": 78,
+      "label": "Bueno para intermedio",
+      "reasons": ["Viento 10–14 kn estable","Ola 0.7 m con periodo 7 s"],
+      "flags": ["Atento a rachas 18 kn"],
+      "raw": { ... métricas usadas ... }
+    }
+  ],
+  "best_window": { ... },
+  "safety": {"no_go": false, "why": []}
+}
+
+
+Llamadas a API (sin clave, con parámetros mínimos):
+
+Weather (Open-Meteo forecast):
+
+hourly: windspeed_10m, windgusts_10m, temperature_2m, precipitation
+
+timezone: usar la solicitada (por defecto Europe/Madrid)
+
+Marine (Open-Meteo marine):
+
+hourly: wave_height, wave_direction, wave_period
+
+Resolución temporal: 3 h (agrega o samplea de la respuesta horaria).
+
+Fallback: si Marine no devuelve datos para esa lat/lon, indica flags: ["Sin datos de mar"] y penaliza moderadamente el score por incertidumbre (−8).
+
+Algoritmo de puntuación (0–100):
+
+Base por viento medio según matriz por tipo de barco y nivel (óptimo en rango; penaliza por defecto y exceso).
+
+Penalización por rachas (gust factor = gust/wind):
+
++0 si gust factor ≤ 1.2; −5 si 1.2–1.35; −10 si 1.35–1.5; −20 si >1.5.
+
+Ola significativa (Hs):
+
+Matriz por barco/nivel con umbrales suaves (piecewise). Ejemplo rápido:
+
+Principiante + vela ligera: óptimo Hs ≤ 0.6 m; 0.6–1.0 m penalización lineal hasta −25; >1.5 m → no_go.
+
+Crucero 35’–45’ intermedio: óptimo Hs ≤ 1.2 m; 1.2–2.0 m penalización lineal hasta −22; >3.0 m → no_go.
+
+Periodo de ola (Tp): bonus si Tp ≥ 7 s (mar de fondo amable) +5; penaliza Tp < 5 s (mar cruzado/corto) −6.
+
+Dirección ola vs viento: si difieren <40° → mar de viento (más incómodo): −4; si 40–140° → neutro; si >140° (mar de largo) → +3.
+
+Precipitación: 0–2 mm/h: −2; 2–5: −6; >5: −15.
+
+Temperatura aparente: fuera de 10–32 °C: penalización suave (−0.8 por cada °C fuera).
+
+Visibilidad: Open-Meteo no la da directa; inferir riesgo de baja visibilidad si precipitación > 2 mm/h → flag “Posible visibilidad reducida”.
+
+Incertidumbre: si faltan variables clave ⇒ penalización acumulativa (máx −12).
+
+Corte de seguridad (no_go):
+
+Principiante: wind > 20 kn o gusts > 28 kn o Hs > 1.5 m ⇒ no_go=true.
+
+Intermedio: wind > 25 kn o gusts > 35 kn o Hs > 2.5 m ⇒ no_go=true.
+
+Avanzado: wind > 32 kn o gusts > 40 kn o Hs > 3.0 m ⇒ no_go=true.
+
+Normaliza y satura en [0,100]. Devuelve además label:
+
+0–39: “No recomendable”
+
+40–59: “Regular / con cautela”
+
+60–79: “Bueno”
+
+80–100: “Muy bueno”
+
+Matriz de viento base (ejemplo mínimo, ajustable):
+
+Define para cada boat_type y skill un rango óptimo (kn) y penalización lineal fuera:
+
+vela_ligera: prin (6–12), inter (8–15), adv (10–18)
+
+cruiser_<35: prin (8–14), inter (10–18), adv (12–22)
+
+cruiser_35_45: prin (8–16), inter (10–20), adv (12–24)
+
+catamaran: prin (8–14), inter (10–18), adv (12–22)
+
+dinghy/wing: prin (7–12), inter (10–16), adv (12–20)
+
+Dentro del rango óptimo: +60 puntos base; por cada nudo fuera, resta 3 hasta −30 máx por viento.
+
+Frontend (SPA):
+
+Barra de búsqueda con autocompletado (usa /api/geocode).
+
+Selectores: tipo de barco, nivel, fecha (hoy/mañana/+3), huso (Europe/Madrid por defecto).
+
+Tarjetas por franja de 3h con: score grande, etiqueta, razones (3 bullets), flags y chips de métricas (viento, racha, Hs, Tp, dir ola, precip).
+
+Bloque “Mejor ventana” destacado arriba.
+
+Conmutador unidades: nudos/kt, m/s (internamente todo en SI; presenta en nudos para viento y metros para ola).
+
+Estado vacío y errores claros (por ej. “Sin datos de mar para esta ubicación”).
+
+Idioma: español (textos y labels).
+
+Calidad y DX:
+
+Estructura de carpetas:
+
+/backend
+  main.py
+  models.py
+  scoring/
+    __init__.py
+    wind.py
+    waves.py
+    combined.py
+  services/
+    openmeteo.py
+    marine.py
+    geocode.py
+  utils/timezone.py
+  tests/test_scoring.py
+/frontend
+  index.html
+  src/main.tsx
+  src/App.tsx
+  src/components/...
+  src/lib/api.ts
+  tailwind.config.js
+
+
+CORS habilitado solo para el frontend local.
+
+Caching simple en memoria 10 min por (lat,lon,fecha) para no saturar APIs.
+
+Manejo de rate-limit: backoff y mensaje de error amigable.
+
+README con cómo arrancar:
+
+Backend: uvicorn backend.main:app --reload --port 8000
+
+Frontend: npm i && npm run dev
+
+Pruebas:
+
+pytest con tests de la función de scoring: casos borde (viento 0 / 35 kn; Hs 0 / 3 m; gust factor alto).
+
+Test de normalización [0,100] y de no_go.
+
+Accesibilidad y móvil:
+
+Diseño responsive, tipografías legibles, contraste AA, tarjetas apilables en móvil.
+
+Licencia y notas:
+
+Indica en el README que los datos provienen de Open-Meteo (gratuito, sin clave) y pueden contener incertidumbre. No es sustituto de partes oficiales.
+
+Implementación del algoritmo (detalle para el dev)
+
+Implementa score_window(inputs: Metrics, ctx: UserProfile) -> ScoreResult donde:
+
+Metrics incluye: wind_kn, gust_kn, wave_hs_m, wave_tp_s, wave_dir_deg, wind_dir_deg, precip_mm_h, temp_c.
+
+UserProfile incluye: boat_type, skill.
+
+Pasos:
+
+Base viento según tabla por boat_type/skill: +0..+60.
+
+Rachas: aplica penalización por gust factor (gust/wind).
+
+Ola: penalización piecewise por Hs según boat_type/skill (valores ejemplo arriba).
+
+Periodo/dirección: bonus/penalizaciones descritos.
+
+Precip/temperatura/incertidumbre.
+
+Clamp 0..100 y genera label, reasons (máx 3 frases cortas) y flags.
+
+Reglas no_go según umbrales por skill.
+
+Devuelve también raw con todas las métricas y sub-puntuaciones para transparencia.
+
+UI copy (ejemplos)
+
+Labels: “Muy bueno”, “Bueno”, “Regular / con cautela”, “No recomendable”.
+
+Flags: “Rachas elevadas”, “Mar de viento”, “Sin datos de mar (estimación conservadora)”.
+
+Razones: “Viento 11 kn estable”, “Ola 0.8 m, Tp 8 s (mar de fondo)”.
+
+Extra (nice to have, si hay tiempo)
+
+Selector de modo: “Travesía corta”, “Entrenamiento”, “Regata ligera” que ajusta pesos ±5.
+
+Exportar la mejor ventana en .ics.
+
+Dark mode.
+
+Entrega un proyecto ejecutable con las rutas indicadas, README claro y un pequeño set de tests que pasen. No uses APIs con clave. Todo en español.
