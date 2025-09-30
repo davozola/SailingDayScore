@@ -7,16 +7,16 @@ interface TimeSlotProps {
 
 export default function TimeSlot({ window, onClick }: TimeSlotProps) {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-blue-500';
-    if (score >= 40) return 'bg-yellow-500';
+    if (score >= 80) return 'bg-green-600';
+    if (score >= 60) return 'bg-blue-600';
+    if (score >= 40) return 'bg-orange-500';
     return 'bg-red-500';
   };
 
   const getScoreTextColor = (score: number) => {
     if (score >= 80) return 'text-green-700';
     if (score >= 60) return 'text-blue-700';
-    if (score >= 40) return 'text-yellow-700';
+    if (score >= 40) return 'text-orange-700';
     return 'text-red-700';
   };
 
@@ -46,17 +46,17 @@ export default function TimeSlot({ window, onClick }: TimeSlotProps) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center p-3 rounded-lg hover:shadow-lg transition-all duration-200 hover:scale-105 bg-white border-2 border-gray-200 hover:border-gray-400 min-w-[140px]"
+      className="flex flex-col items-center p-3 rounded-xl hover:shadow-md transition-all duration-200 bg-white border border-gray-200 hover:border-gray-300 min-w-[140px]"
     >
-      <div className="text-xs font-semibold text-gray-600 mb-2">
+      <div className="text-xs font-medium text-gray-600 mb-2">
         {formatTime(window.time)}
       </div>
       
-      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${getScoreColor(window.score)} text-white font-bold text-xl shadow-md mb-2`}>
+      <div className={`w-14 h-14 rounded-full flex items-center justify-center ${getScoreColor(window.score)} text-white font-bold text-lg mb-2`}>
         {window.score}
       </div>
       
-      <div className={`text-xs font-semibold ${getScoreTextColor(window.score)} mb-1`}>
+      <div className={`text-xs font-medium ${getScoreTextColor(window.score)} mb-1`}>
         {window.label}
       </div>
 

@@ -7,10 +7,10 @@ interface ForecastCardProps {
 
 export default function ForecastCard({ window, useKnots }: ForecastCardProps) {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-50';
-    if (score >= 60) return 'text-blue-600 bg-blue-50';
-    if (score >= 40) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (score >= 80) return 'text-green-700 bg-green-50';
+    if (score >= 60) return 'text-blue-700 bg-blue-50';
+    if (score >= 40) return 'text-orange-700 bg-orange-50';
+    return 'text-red-700 bg-red-50';
   };
 
   const formatTime = (timeStr: string) => {
@@ -51,57 +51,57 @@ export default function ForecastCard({ window, useKnots }: ForecastCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <div className="text-sm text-gray-500">{formatDate(window.time)}</div>
-          <div className="text-xl font-bold">{formatTime(window.time)}</div>
+          <div className="text-xs text-gray-500">{formatDate(window.time)}</div>
+          <div className="text-lg font-semibold text-gray-900">{formatTime(window.time)}</div>
         </div>
-        <div className={`text-4xl font-bold px-4 py-2 rounded-lg ${getScoreColor(window.score)}`}>
+        <div className={`text-3xl font-bold px-3 py-1 rounded-xl ${getScoreColor(window.score)}`}>
           {window.score}
         </div>
       </div>
 
-      <div className="mb-4">
-        <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getScoreColor(window.score)}`}>
+      <div className="mb-3">
+        <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getScoreColor(window.score)}`}>
           {window.label}
         </div>
       </div>
 
-      <div className="mb-4 text-sm text-gray-600">
+      <div className="mb-4 text-sm text-gray-500">
         {getBriefReason()}
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <div className="bg-gray-50 rounded p-2">
-          <div className="text-gray-500">Viento</div>
-          <div className="font-semibold">{convertWindSpeed(window.raw.wind_kn)}</div>
+        <div className="bg-gray-50 rounded-lg p-2">
+          <div className="text-xs text-gray-500">Viento</div>
+          <div className="font-medium text-gray-900">{convertWindSpeed(window.raw.wind_kn)}</div>
         </div>
-        <div className="bg-gray-50 rounded p-2">
-          <div className="text-gray-500">Rachas</div>
-          <div className="font-semibold">{convertWindSpeed(window.raw.gust_kn)}</div>
+        <div className="bg-gray-50 rounded-lg p-2">
+          <div className="text-xs text-gray-500">Rachas</div>
+          <div className="font-medium text-gray-900">{convertWindSpeed(window.raw.gust_kn)}</div>
         </div>
         {window.raw.wave_hs_m !== null && window.raw.wave_hs_m !== undefined && (
           <>
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-gray-500">Ola (Hs)</div>
-              <div className="font-semibold">{window.raw.wave_hs_m.toFixed(1)} m</div>
+            <div className="bg-gray-50 rounded-lg p-2">
+              <div className="text-xs text-gray-500">Ola (Hs)</div>
+              <div className="font-medium text-gray-900">{window.raw.wave_hs_m.toFixed(1)} m</div>
             </div>
             {window.raw.wave_tp_s && (
-              <div className="bg-gray-50 rounded p-2">
-                <div className="text-gray-500">Periodo (Tp)</div>
-                <div className="font-semibold">{window.raw.wave_tp_s.toFixed(1)} s</div>
+              <div className="bg-gray-50 rounded-lg p-2">
+                <div className="text-xs text-gray-500">Periodo (Tp)</div>
+                <div className="font-medium text-gray-900">{window.raw.wave_tp_s.toFixed(1)} s</div>
               </div>
             )}
           </>
         )}
-        <div className="bg-gray-50 rounded p-2">
-          <div className="text-gray-500">Precipitación</div>
-          <div className="font-semibold">{window.raw.precip_mm_h.toFixed(1)} mm/h</div>
+        <div className="bg-gray-50 rounded-lg p-2">
+          <div className="text-xs text-gray-500">Precipitación</div>
+          <div className="font-medium text-gray-900">{window.raw.precip_mm_h.toFixed(1)} mm/h</div>
         </div>
-        <div className="bg-gray-50 rounded p-2">
-          <div className="text-gray-500">Temperatura</div>
-          <div className="font-semibold">{window.raw.temp_c.toFixed(1)}°C</div>
+        <div className="bg-gray-50 rounded-lg p-2">
+          <div className="text-xs text-gray-500">Temperatura</div>
+          <div className="font-medium text-gray-900">{window.raw.temp_c.toFixed(1)}°C</div>
         </div>
       </div>
     </div>

@@ -94,23 +94,36 @@ function App() {
     }
   };
 
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-6 py-6 max-w-6xl">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            Sailing Day Score
+          </h1>
+          <p className="text-gray-600 text-sm">
+            Calcula la navegabilidad del día según condiciones meteorológicas y marinas
+          </p>
+        </header>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
                 Ubicación
               </label>
               <LocationSearch onSelect={handleLocationSelect} onSearch={geocode} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   Tipo de embarcación
                 </label>
                 <select
                   value={boatType}
                   onChange={(e) => setBoatType(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 bg-white text-sm"
                 >
                   <option value="vela_ligera">Vela ligera</option>
                   <option value="cruiser_35">Crucero &lt;35'</option>
@@ -122,13 +135,13 @@ function App() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   Nivel de experiencia
                 </label>
                 <select
                   value={skill}
                   onChange={(e) => handleSkillChange(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 bg-white text-sm"
                 >
                   <option value="principiante">Principiante</option>
                   <option value="intermedio">Intermedio</option>
@@ -137,44 +150,44 @@ function App() {
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Límites de seguridad (personalizables)</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 rounded-xl p-4">
+              <h3 className="text-xs font-medium text-gray-600 mb-3">Límites de seguridad (personalizables)</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Viento mín. (kn)</label>
+                  <label className="block text-xs text-gray-500 mb-1">Viento mín. (kn)</label>
                   <input
                     type="number"
                     value={minWind}
                     onChange={(e) => setMinWind(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Viento máx. (kn)</label>
+                  <label className="block text-xs text-gray-500 mb-1">Viento máx. (kn)</label>
                   <input
                     type="number"
                     value={maxWind}
                     onChange={(e) => setMaxWind(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Rachas máx. (kn)</label>
+                  <label className="block text-xs text-gray-500 mb-1">Rachas máx. (kn)</label>
                   <input
                     type="number"
                     value={maxGust}
                     onChange={(e) => setMaxGust(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Ola máx. (m)</label>
+                  <label className="block text-xs text-gray-500 mb-1">Ola máx. (m)</label>
                   <input
                     type="number"
                     step="0.1"
                     value={maxWave}
                     onChange={(e) => setMaxWave(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-sm"
                   />
                 </div>
               </div>
@@ -183,16 +196,16 @@ function App() {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center space-x-2">
-                  <label className="text-sm font-semibold text-gray-700">Unidades:</label>
+                  <label className="text-xs font-medium text-gray-600">Unidades:</label>
                   <button
                     onClick={() => setUseKnots(true)}
-                    className={`px-3 py-2 rounded text-sm ${useKnots ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${useKnots ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                   >
                     Nudos (kn)
                   </button>
                   <button
                     onClick={() => setUseKnots(false)}
-                    className={`px-3 py-2 rounded text-sm ${!useKnots ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${!useKnots ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                   >
                     m/s
                   </button>
@@ -203,16 +216,16 @@ function App() {
                     type="checkbox"
                     checked={showNightSlots}
                     onChange={(e) => setShowNightSlots(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-gray-900 rounded focus:ring-gray-500"
                   />
-                  <span className="text-sm text-gray-700">Mostrar franjas nocturnas</span>
+                  <span className="text-xs text-gray-600">Mostrar franjas nocturnas</span>
                 </label>
               </div>
 
               <button
                 onClick={handleCalculate}
                 disabled={loading || !selectedLocation}
-                className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Calculando...' : 'Calcular Score'}
               </button>

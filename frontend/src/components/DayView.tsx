@@ -24,17 +24,17 @@ export default function DayView({ windows, onSlotClick }: DayViewProps) {
   , windows[0]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-bold text-gray-800 capitalize">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-lg font-semibold text-gray-900 capitalize">
           {formatDate(windows[0].time)}
         </h3>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Mejor:</span>
-          <div className={`px-3 py-1 rounded-full font-semibold ${
+          <span className="text-xs text-gray-500">Mejor:</span>
+          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
             bestWindowOfDay.score >= 80 ? 'bg-green-100 text-green-700' :
             bestWindowOfDay.score >= 60 ? 'bg-blue-100 text-blue-700' :
-            bestWindowOfDay.score >= 40 ? 'bg-yellow-100 text-yellow-700' :
+            bestWindowOfDay.score >= 40 ? 'bg-orange-100 text-orange-700' :
             'bg-red-100 text-red-700'
           }`}>
             {bestWindowOfDay.score}
@@ -43,7 +43,7 @@ export default function DayView({ windows, onSlotClick }: DayViewProps) {
       </div>
       
       <div className="overflow-x-auto">
-        <div className="flex space-x-4 pb-2">
+        <div className="flex space-x-3 pb-2">
           {windows.map((window, idx) => (
             <TimeSlot 
               key={idx} 
