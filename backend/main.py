@@ -101,8 +101,8 @@ async def score(request: ScoreRequest):
                 wave_dir = m_sample.get("wave_direction")
             
             metrics = RawMetrics(
-                wind_kn=w_sample["wind_speed"] * 1.94384,
-                gust_kn=w_sample["wind_gust"] * 1.94384,
+                wind_kn=w_sample["wind_speed"] * 0.539957,
+                gust_kn=w_sample["wind_gust"] * 0.539957,
                 wave_hs_m=wave_hs,
                 wave_tp_s=wave_tp,
                 wave_dir_deg=wave_dir,
