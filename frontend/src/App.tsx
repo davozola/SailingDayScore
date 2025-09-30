@@ -15,6 +15,7 @@ function App() {
   const [useKnots, setUseKnots] = useState(true);
   const [selectedWindow, setSelectedWindow] = useState<WindowScore | null>(null);
   const [showNightSlots, setShowNightSlots] = useState(false);
+  const [minWind, setMinWind] = useState(10);
   const [maxWind, setMaxWind] = useState(25);
   const [maxGust, setMaxGust] = useState(35);
   const [maxWave, setMaxWave] = useState(2.5);
@@ -27,14 +28,17 @@ function App() {
   const handleSkillChange = (newSkill: string) => {
     setSkill(newSkill);
     if (newSkill === 'principiante') {
+      setMinWind(8);
       setMaxWind(20);
       setMaxGust(28);
       setMaxWave(1.5);
     } else if (newSkill === 'intermedio') {
+      setMinWind(10);
       setMaxWind(25);
       setMaxGust(35);
       setMaxWave(2.5);
     } else {
+      setMinWind(12);
       setMaxWind(32);
       setMaxGust(40);
       setMaxWave(3.0);
@@ -148,7 +152,16 @@ function App() {
 
             <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Límites de seguridad (personalizables)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Viento mín. (kn)</label>
+                  <input
+                    type="number"
+                    value={minWind}
+                    onChange={(e) => setMinWind(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  />
+                </div>
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">Viento máx. (kn)</label>
                   <input

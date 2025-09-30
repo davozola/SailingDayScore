@@ -28,8 +28,8 @@ CACHE: Dict[str, Tuple[Tuple, float]] = {}
 CACHE_TTL = 600.0
 
 
-def get_cache_key(lat: float, lon: float, date: str) -> str:
-    return f"{lat:.2f}_{lon:.2f}_{date}"
+def get_cache_key(lat: float, lon: float, date: str, boat_type: str = "", skill: str = "") -> str:
+    return f"{lat:.2f}_{lon:.2f}_{date}_{boat_type}_{skill}"
 
 
 def clean_expired_cache():
@@ -59,7 +59,7 @@ async def score(request: ScoreRequest):
     try:
         clean_expired_cache()
         
-        cache_key = get_cache_key(request.lat, request.lon, request.date)
+        cache_key = get_cache_key(request.lat, request.lon, request.date, request.boat_type.value, request.skill.value)
         now = datetime.now().timestamp()
         
         if cache_key in CACHE:
