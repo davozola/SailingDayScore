@@ -13,6 +13,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Redesigned UI with minimalist aesthetic**: Clean, professional look with subtle colors and improved spacing
+  - Header simplified: Smaller title (text-3xl), left-aligned, no emoji
+  - Background changed to lighter shade (#fafafa) for softer appearance
+  - Form labels reduced to text-xs font-medium for discretion
+  - Buttons changed to gray-900 (dark) from blue-600 for modern feel
+  - Card shadows softened (shadow-sm) with subtle borders (border-gray-200)
+  - Border radius increased to rounded-2xl for smoother appearance
+  - Typography refined across all components for visual hierarchy
+  - Color palette balanced: green-600/blue-600/orange-500/red-500 for scores
 - ✅ Simplified forecast card UI: 2-3 word brief reasons ("Condiciones ideales", "Mar agitado", "Viento flojo") below score
 - ✅ Removed detailed reasons and warning flags blocks for cleaner interface
 - ✅ Enhanced scoring algorithm: 75 base points for optimal wind (up from 60), steeper degradation for light winds (-5/kn vs -3/kn)
