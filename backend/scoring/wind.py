@@ -50,8 +50,18 @@ def score_wind(wind_kn: float, boat_type: BoatType, skill: SkillLevel) -> Tuple[
     else:
         if wind_kn < min_optimal:
             delta = min_optimal - wind_kn
-            # Pendiente más pronunciada para vientos flojos (5 puntos por kn)
-            score = max(75.0 - (delta * 5.0), 20.0)
+            # Penalización progresiva más suave para viento flojo
+            # 0-3 kn bajo óptimo: -3 puntos/kn
+            # 3-6 kn bajo óptimo: -4 puntos/kn adicional
+            # 6+ kn bajo óptimo: -5 puntos/kn adicional
+            if delta <= 3:
+                penalty = delta * 3.0
+            elif delta <= 6:
+                penalty = (3 * 3.0) + ((delta - 3) * 4.0)
+            else:
+                penalty = (3 * 3.0) + (3 * 4.0) + ((delta - 6) * 5.0)
+            
+            score = max(75.0 - penalty, 20.0)
             reason = f"Viento {wind_kn:.1f} kn (flojo, óptimo {min_optimal:.0f}-{max_optimal:.0f} kn)"
         else:
             delta = wind_kn - max_optimal

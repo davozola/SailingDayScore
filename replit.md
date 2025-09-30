@@ -13,15 +13,20 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Fixed scoring algorithm for low wind conditions**: Adjusted penalties to allow proper score variation
+  - Changed from flat -5 pts/kn to progressive: -3 pts/kn (0-3kn below optimal), -4 pts/kn (3-6kn), -5 pts/kn (6+kn)
+  - Reduced minimum navigable score from 40 to 25 points to allow realistic low-wind scoring
+  - Barcelona now shows score range 25-52 instead of flat 40 across all windows
+  - All 23 pytest tests continue passing with adjusted algorithm
 - ✅ **Updated boat types with professional classifications**: New system based on eslora and real vessel types
-  - Dinghy (7-15 ft): Optimist, Laser, 420, 470 - Wind 6-18 kn, Waves ≤0.6-1.0m
-  - Catamarán ligero (14-20 ft): Hobie Cat, Nacra, Dart - Wind 8-22 kn, Waves ≤0.8-1.5m
-  - Velero pequeño (20-30 ft): Beneteau First 25, J/80 - Wind 8-20 kn, Waves ≤1.0-2.0m
-  - Velero medio (30-40 ft): Bavaria 34, Sun Odyssey 36 - Wind 10-24 kn, Waves ≤1.5-2.5m
-  - Velero grande (40-50 ft): Hanse 45, Jeanneau 49 - Wind 10-26 kn, Waves ≤2.0-3.0m
+  - Vela ligera/dinghy (7-15 pies): Optimist, Laser, 420, 470 - Wind 6-18 kn, Waves ≤0.6-1.0m
+  - Catamarán ligero (14-20 pies): Hobie Cat, Nacra, Dart - Wind 8-22 kn, Waves ≤0.8-1.5m
+  - Velero pequeño (20-30 pies): Beneteau First 25, J/80 - Wind 8-20 kn, Waves ≤1.0-2.0m
+  - Velero medio (30-40 pies): Bavaria 34, Sun Odyssey 36 - Wind 10-24 kn, Waves ≤1.5-2.5m
+  - Velero grande (40-50 pies): Hanse 45, Jeanneau 49 - Wind 10-26 kn, Waves ≤2.0-3.0m
   - Tablas (windsurf/wing/foil): Wind 12-30 kn, Waves ≤0.8-1.5m
   - Updated all scoring matrices with proper wind/wave thresholds per skill level
-  - All 23 pytest tests passing with new boat types
+  - Changed "ft" to "pies" for Spanish consistency
 - ✅ **Added contextual descriptions in detail modal**: Personalized guidance based on boat type and skill level
   - Smart recommendations tailored to user's experience (principiante/intermedio/avanzado)
   - Boat-specific advice for different vessel types
