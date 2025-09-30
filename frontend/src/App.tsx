@@ -94,19 +94,6 @@ function App() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">
-            ⛵ Sailing Day Score
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Calcula la navegabilidad del día según condiciones meteorológicas y marinas
-          </p>
-        </header>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
