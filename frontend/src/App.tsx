@@ -241,24 +241,6 @@ function App() {
 
         {forecastData && (
           <div>
-            {forecastData.safety.no_go && (
-              <div className="bg-red-100 border-2 border-red-500 rounded-lg p-6 mb-6">
-                <div className="flex items-start">
-                  <span className="text-3xl mr-4">🚫</span>
-                  <div>
-                    <h3 className="text-xl font-bold text-red-800 mb-2">
-                      Condiciones NO aptas para navegar
-                    </h3>
-                    <ul className="space-y-1">
-                      {forecastData.safety.why.map((reason, idx) => (
-                        <li key={idx} className="text-red-700">• {reason}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {forecastData.best_window && (
               <BestWindow window={forecastData.best_window} useKnots={useKnots} />
             )}
