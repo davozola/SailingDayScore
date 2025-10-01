@@ -77,33 +77,50 @@ def score_wind(wind_kn: float, boat_type: BoatType, skill: SkillLevel) -> Tuple[
 
 def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_optimal_range: bool = False) -> Tuple[float, str]:
     """
-    Penaliza por factor de rachas según nivel de experiencia.
-    Usa GUST_WEIGHTS: beginner 1.0, intermediate 0.7, advanced 0.5
+    Penaliza por factor de rachas con enfoque híbrido:
+    - Vientos bajos: usa umbrales absolutos (evita penalizar rachas pequeñas)
+    - Vientos óptimos/altos: usa ratio de rachas
     Retorna (penalización, flag opcional)
     """
     if wind_kn < 1.0:
         return 0.0, ""
     
-    gust_factor = gust_kn / wind_kn
-    
-    # GUST_WEIGHTS según nuevo algoritmo
     gust_weights = {
         SkillLevel.PRINCIPIANTE: 1.0,
         SkillLevel.INTERMEDIO: 0.7,
         SkillLevel.AVANZADO: 0.5
     }
     multiplier = gust_weights[skill]
+    gust_delta = gust_kn - wind_kn
     
-    if gust_factor <= 1.2:
+    # Para vientos fuera del rango óptimo (bajos): usar umbrales absolutos
+    if not in_optimal_range:
+        # Rachas pequeñas en viento bajo: sin penalización
+        if gust_kn < 10.0 or gust_delta < 4.0:
+            return 0.0, ""
+        # Rachas moderadas
+        elif gust_kn < 14.0 or gust_delta < 6.0:
+            return -3.0 * multiplier, ""
+        # Rachas irregulares
+        elif gust_kn < 18.0 or gust_delta < 8.0:
+            return -6.0 * multiplier, f"Rachas irregulares ({gust_kn:.1f} kn)"
+        # Rachas fuertes (solo si realmente son fuertes)
+        else:
+            return -10.0 * multiplier, f"Rachas fuertes ({gust_kn:.1f} kn)"
+    
+    # Para vientos en rango óptimo: usar ratio pero más permisivo
+    gust_factor = gust_kn / wind_kn
+    
+    if gust_factor <= 1.25:
         return 0.0, ""
-    elif gust_factor <= 1.35:
-        penalty = -5.0 * multiplier
-        return penalty, ""
-    elif gust_factor <= 1.5:
+    elif gust_factor <= 1.4:
+        return -5.0 * multiplier, ""
+    elif gust_factor <= 1.6:
         penalty = -10.0 * multiplier
-        flag = f"Rachas fuertes ({gust_kn:.1f} kn)" if gust_factor > 1.35 else ""
+        flag = f"Rachas irregulares ({gust_kn:.1f} kn)" if gust_kn >= 16.0 else ""
         return penalty, flag
     else:
-        penalty = -20.0 * multiplier
-        flag = f"Rachas fuertes ({gust_kn:.1f} kn)"
+        # Solo penalizar fuerte si las rachas son realmente peligrosas
+        penalty = -20.0 * multiplier if gust_kn >= 22.0 else -15.0 * multiplier
+        flag = f"Rachas fuertes ({gust_kn:.1f} kn)" if gust_kn >= 18.0 else f"Rachas irregulares ({gust_kn:.1f} kn)"
         return penalty, flag

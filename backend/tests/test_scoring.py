@@ -27,24 +27,28 @@ class TestWindScoring:
         assert "óptimo" in reason  # Cambio de texto
     
     def test_gust_factor_low(self):
-        penalty, flag = score_gust_factor(10.0, 11.0, SkillLevel.INTERMEDIO)
+        # Viento óptimo (in_optimal_range=True), rachas bajas
+        penalty, flag = score_gust_factor(10.0, 11.0, SkillLevel.INTERMEDIO, in_optimal_range=True)
         assert penalty == 0.0
         assert flag == ""
     
     def test_gust_factor_moderate(self):
-        penalty, flag = score_gust_factor(10.0, 13.0, SkillLevel.INTERMEDIO)
-        assert penalty <= -3.0
-        # Flag simplificado en nuevo algoritmo
+        # Viento óptimo con rachas moderadas
+        penalty, flag = score_gust_factor(10.0, 13.0, SkillLevel.INTERMEDIO, in_optimal_range=True)
+        assert penalty <= -3.5  # -5 * 0.7 = -3.5
+        assert flag == ""
     
     def test_gust_factor_high(self):
-        penalty, flag = score_gust_factor(10.0, 14.5, SkillLevel.INTERMEDIO)
-        assert penalty <= -5.0
-        assert "Rachas" in flag or flag == ""  # Texto simplificado
+        # Viento óptimo con rachas altas
+        penalty, flag = score_gust_factor(10.0, 14.5, SkillLevel.INTERMEDIO, in_optimal_range=True)
+        assert penalty <= -7.0  # -10 * 0.7 = -7.0
+        assert flag == ""  # No flag si gust_kn < 16
     
-    def test_gust_factor_extreme(self):
-        penalty, flag = score_gust_factor(10.0, 18.0, SkillLevel.INTERMEDIO)
-        assert penalty <= -10.0
-        # Flag may be empty in some cases depending on context
+    def test_gust_factor_low_wind(self):
+        # Viento bajo con rachas pequeñas: sin penalización por umbrales absolutos
+        penalty, flag = score_gust_factor(2.5, 4.5, SkillLevel.INTERMEDIO, in_optimal_range=False)
+        assert penalty == 0.0  # gust_kn < 10 y gust_delta < 4
+        assert flag == ""
 
 
 class TestWaveScoring:

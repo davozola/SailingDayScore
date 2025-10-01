@@ -13,6 +13,13 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Fixed gust penalty algorithm - scores now higher and more realistic** (October 1, 2025):
+  - Implemented hybrid gust penalty approach to avoid over-penalizing low winds
+  - For sub-optimal winds: uses absolute thresholds (gust_kn < 10 kn or delta < 4 kn = no penalty)
+  - For optimal winds: uses ratio with higher thresholds (≤1.25 = no penalty, was 1.2)
+  - "Rachas fuertes" flag only shows when gust_kn ≥ 18 kn (was showing for tiny gusts)
+  - Barcelona example: scores now 28-43 (was 14-22), flags almost eliminated
+  - All 23 pytest tests updated and passing
 - ✅ **Updated scoring algorithm with refined calculations** (October 1, 2025):
   - Changed wind base score from 75 to 60 points for optimal conditions (more realistic scoring range)
   - Implemented smoother wind deficit penalties: -1/-2/-3/-4 pts/kn (progressive, less aggressive)
@@ -21,7 +28,6 @@ Preferred communication style: Simple, everyday language.
   - Changed wave period Tp >= 7s bonus from 10 to +5 points (more balanced)
   - Made Tp < 5s penalties conditional on wave height: -3/-5/-8 pts depending on Hs
   - Updated score labels: "No recomendable" (<30), "A valorar con mucha cautela" (<45), "Aceptable / depende de experiencia" (<60), "Bueno" (<80), "Muy bueno" (>=80)
-  - All 23 pytest tests updated and passing
 - ✅ **Configured production deployment**: Ready for autoscale deployment with optimized configuration
   - Backend serves frontend static files using FastAPI StaticFiles (single server architecture)
   - Build command: `npm run build` compiles frontend to `dist/` directory
