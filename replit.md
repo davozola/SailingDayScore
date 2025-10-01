@@ -20,6 +20,13 @@ Preferred communication style: Simple, everyday language.
   - "Rachas fuertes" flag only shows when gust_kn ≥ 18 kn (was showing for tiny gusts)
   - Barcelona example: scores now 28-43 (was 14-22), flags almost eliminated
   - All 23 pytest tests updated and passing
+- ✅ **Optimized gust penalty for maximum leniency** (October 1, 2025):
+  - Rachas < 10 kn: **sin penalización** (0 puntos)
+  - Rachas ≥ 10 kn: penalización progresiva con peso según fuerza del viento
+  - Flag "Rachas fuertes" solo en casos MUY justificados: viento >15 kn Y factor ≥ 2.0x
+  - Suelo de 35 puntos para evitar castigo injusto con vientos bajos
+  - Barcelona: scores 35-51 puntos, sin flags de "Rachas fuertes"
+  - All 24 pytest tests passing
 - ✅ **Updated scoring algorithm with refined calculations** (October 1, 2025):
   - Changed wind base score from 75 to 60 points for optimal conditions (more realistic scoring range)
   - Implemented smoother wind deficit penalties: -1/-2/-3/-4 pts/kn (progressive, less aggressive)

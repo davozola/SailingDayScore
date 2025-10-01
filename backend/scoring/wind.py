@@ -78,6 +78,7 @@ def score_wind(wind_kn: float, boat_type: BoatType, skill: SkillLevel) -> Tuple[
 def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_optimal_range: bool = False) -> Tuple[float, str]:
     """
     Penaliza por rachas usando parche suave que reduce penalización con vientos bajos.
+    Rachas <10 kn prácticamente no penalizan. Penalización progresiva para rachas >=10 kn.
     Retorna (penalización, flag opcional)
     """
     if wind_kn <= 0:
@@ -85,6 +86,10 @@ def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_opti
     
     gf = gust_kn / wind_kn
     delta = max(0, gust_kn - wind_kn)
+    
+    # Si rachas < 10 kn, prácticamente sin penalización
+    if gust_kn < 10.0:
+        return 0.0, ""
     
     # Componente relativa
     if gf <= 1.2:
@@ -122,11 +127,10 @@ def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_opti
     }
     gust_pen = max(gust_pen, caps[skill])
     
-    # Flag solo si rachas realmente fuertes
+    # Flag "Rachas fuertes" solo en casos MUY justificados:
+    # - Viento normal alto (>15 kn) Y factor >= 2x
     flag = ""
-    if gust_kn >= 20 and gf > 1.5:
+    if wind_kn > 15.0 and gf >= 2.0:
         flag = f"Rachas fuertes ({gust_kn:.1f} kn)"
-    elif gust_kn >= 16 and gf > 1.4:
-        flag = f"Rachas irregulares ({gust_kn:.1f} kn)"
     
     return gust_pen, flag
