@@ -55,10 +55,6 @@ localPort = 5001
 externalPort = 3002
 
 [[ports]]
-localPort = 5002
-externalPort = 3003
-
-[[ports]]
 localPort = 8000
 externalPort = 8000
 
@@ -73,4 +69,4 @@ externalPort = 3000
 [deployment]
 deploymentTarget = "autoscale"
 run = ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "5000"]
-build = ["bash", "build.sh"]
+build = ["./build.sh"]
