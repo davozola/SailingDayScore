@@ -13,6 +13,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes (September 30, 2025)
 
 ### Latest Updates
+- ✅ **Updated scoring algorithm with refined calculations** (October 1, 2025):
+  - Changed wind base score from 75 to 60 points for optimal conditions (more realistic scoring range)
+  - Implemented smoother wind deficit penalties: -1/-2/-3/-4 pts/kn (progressive, less aggressive)
+  - Updated GUST_WEIGHTS: beginner 1.0, intermediate 0.7, advanced 0.5 (simplified)
+  - Refactored wave height to piecewise scoring: ok/soft_bad/hard_nogo zones (-0/-15/-25 pts max)
+  - Changed wave period Tp >= 7s bonus from 10 to +5 points (more balanced)
+  - Made Tp < 5s penalties conditional on wave height: -3/-5/-8 pts depending on Hs
+  - Updated score labels: "No recomendable" (<30), "A valorar con mucha cautela" (<45), "Aceptable / depende de experiencia" (<60), "Bueno" (<80), "Muy bueno" (>=80)
+  - All 23 pytest tests updated and passing
 - ✅ **Configured production deployment**: Ready for autoscale deployment with optimized configuration
   - Backend serves frontend static files using FastAPI StaticFiles (single server architecture)
   - Build command: `npm run build` compiles frontend to `dist/` directory
