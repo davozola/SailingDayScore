@@ -1,0 +1,129 @@
+# Entradas
+Metrics:
+  wind_kn, gust_kn, wave_hs_m, wave_tp_s, wind_dir_deg, wave_dir_deg,
+  precip_mm_h, temp_c
+Profile:
+  boat_type ∈ {dinghy, cat_ligero, velero_20_30, velero_30_40, velero_40_50, tabla}
+  skill ∈ {beginner, intermediate, advanced}
+
+# Tablas base (ejemplo; ponlas en JSON)
+WIND_OPT[boat_type][skill] -> (opt_min, opt_max)   # en kn
+# p.ej. dinghy: beginner (8,15) inter (10,16) adv (12,18)
+
+HS_LIMITS[boat_type][skill] -> (ok, soft_bad, hard_nogo)
+# p.ej. dinghy: beginner (0.6, 1.0, 1.5), advanced (1.0, 1.5, 2.0)
+
+NO_GO[skill] -> {wind_kn, gust_kn, hs_m}
+# p.ej. beginner: (20, 28, 1.5) / inter: (25, 35, 2.5) / adv: (32, 40, 3.0)
+
+GUST_WEIGHTS = { beginner: 1.0, intermediate: 0.7, advanced: 0.5 }
+
+# 1) Chequeo de seguridad (no-go)
+if wind_kn > NO_GO[skill].wind_kn or
+   gust_kn > NO_GO[skill].gust_kn or
+   wave_hs_m > NO_GO[skill].hs_m:
+    return score= max(10, 30 - 2*(exceso_grave)), label="No recomendable", no_go=true
+
+# 2) Puntuación base por viento (máx +60)
+base = 0
+(opt_min, opt_max) = WIND_OPT[boat_type][skill]
+
+if wind_kn between [opt_min, opt_max]:
+    base = 60
+else if wind_kn < opt_min:
+    deficit = opt_min - wind_kn
+    # Ajuste suave: −1 por nudo hasta −8 (antes era demasiado agresivo)
+    base = max(60 - 1*deficit, 52)      # no bajar más de 8 por déficit leve
+    if wind_kn < (opt_min - 2):
+        base = max(60 - (2 + 2*(deficit - 2)), 40)  # caída moderada hasta ~40
+    if wind_kn < (opt_min - 4):
+        base = max(60 - (10 + 4*(deficit - 4)), 25) # caída fuerte si <4 kn
+else:  # wind_kn > opt_max
+    excess = wind_kn - opt_max
+    # Exceso se mantiene más severo que déficit
+    base = max(60 - 3*excess, 30)
+
+# 3) Penalización por rachas (máx ~ −20, modulada por nivel)
+gust_pen = 0
+if wind_kn > 0:
+    gf = gust_kn / wind_kn  # gust factor
+    if gf <= 1.2: gust_pen = 0
+    elif gf <= 1.35: gust_pen = -5
+    elif gf <= 1.5:  gust_pen = -10
+    else:            gust_pen = -20
+else:
+    gf = 1.0  # sin viento no penalices
+gust_pen = gust_pen * GUST_WEIGHTS[skill]
+
+# 4) Ola Hs (piecewise por tipo y nivel) (máx ~ −25)
+hs_pen = 0
+(ok, soft_bad, hard_nogo) = HS_LIMITS[boat_type][skill]
+if wave_hs_m <= ok: 
+    hs_pen = 0
+elif wave_hs_m <= soft_bad:
+    t = (wave_hs_m - ok) / (soft_bad - ok)
+    hs_pen = - round( t * 15 )          # hasta −15 en zona “amarilla”
+else:
+    t = min(1.0, (wave_hs_m - soft_bad) / (hard_nogo - soft_bad))
+    hs_pen = - (15 + round( t * 10 ))   # hasta −25 cerca de no-go
+
+# 5) Periodo de ola (Tp) condicionado por Hs (máx −8 / +5)
+tp_adj = 0
+if wave_tp_s >= 7: 
+    tp_adj = +5
+elif wave_tp_s < 5:
+    # Si la ola es pequeña, reduce el castigo
+    if wave_hs_m <= 0.5: tp_adj = -3
+    elif wave_hs_m <= 0.8: tp_adj = -5
+    else: tp_adj = -8
+else:
+    tp_adj = 0
+
+# 6) Relación dirección ola-viento (mar de viento)
+dir_pen = 0
+angle = abs(wind_dir_deg - wave_dir_deg) % 360
+if angle > 180: angle = 360 - angle
+if angle < 40: 
+    dir_pen = -4      # mar de viento, más incómodo
+elif angle > 140:
+    dir_pen = +3      # mar de fondo/largo, más amable
+
+# 7) Precipitación y temperatura (penalizaciones suaves)
+prec_pen = 0
+if precip_mm_h > 5:      prec_pen = -15
+elif precip_mm_h > 2:    prec_pen = -6
+elif precip_mm_h > 0.2:  prec_pen = -2
+
+temp_pen = 0
+if temp_c < 10: temp_pen = -0.8 * (10 - temp_c)
+elif temp_c > 32: temp_pen = -0.8 * (temp_c - 32)
+
+# 8) Suma, clamp y etiquetas
+raw_score = base + gust_pen + hs_pen + tp_adj + dir_pen + prec_pen + temp_pen
+score = clamp(round(raw_score), 0, 100)
+
+if score < 30:          label = "No recomendable"
+elif score < 45:        label = "A valorar con mucha cautela"
+elif score < 60:        label = "Aceptable / depende de experiencia"
+elif score < 80:        label = "Bueno"
+else:                   label = "Muy bueno"
+
+# 9) Razones y flags (máx 3 razones)
+reasons = []
+if wind_kn between [opt_min, opt_max]: reasons += [f"Viento {round(wind_kn,1)} kn en rango óptimo"]
+elif wind_kn < opt_min: reasons += [f"Viento flojo {round(wind_kn,1)} kn (óptimo {opt_min}-{opt_max})"]
+else: reasons += [f"Viento fuerte {round(wind_kn,1)} kn (óptimo {opt_min}-{opt_max})"]
+
+if wave_hs_m <= ok: reasons += [f"Ola {wave_hs_m:.1f} m favorable"]
+elif wave_hs_m <= soft_bad: reasons += [f"Ola {wave_hs_m:.1f} m moderada"]
+else: reasons += [f"Ola {wave_hs_m:.1f} m elevada"]
+
+if wave_tp_s >= 7: reasons += [f"Tp {wave_tp_s:.1f} s (mar de fondo)"]
+elif wave_tp_s < 5: reasons += [f"Tp {wave_tp_s:.1f} s (mar corto)"]
+
+flags = []
+if gf > 1.35: flags += [f"Rachas fuertes ({gust_kn:.1f} kn)"]
+if angle < 40: flags += ["Mar de viento"]
+if precip_mm_h > 2: flags += ["Posible visibilidad reducida"]
+
+return {score, label, reasons[0:3], flags, no_go=false}
