@@ -47,3 +47,4 @@ frontend/dist-ssr/
 .cache/
 .upm/
 .pythonlibs/
+.env
