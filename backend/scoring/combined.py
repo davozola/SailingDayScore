@@ -117,20 +117,20 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
         for reason in no_go_reasons:
             flags.append(f"⚠️ NO-GO: {reason}")
     else:
-        # Score mínimo de 25 en condiciones navegables (permite más variación)
-        score_clamped = max(25, min(100, int(round(total_score))))
+        # Clamp score entre 0 y 100
+        score_clamped = max(0, min(100, int(round(total_score))))
         
-        # Labels más granulares
-        if score_clamped >= 80:
-            label = "Excelente"
-        elif score_clamped >= 70:
-            label = "Muy bueno"
-        elif score_clamped >= 60:
+        # Labels según nuevo algoritmo
+        if score_clamped < 30:
+            label = "No recomendable"
+        elif score_clamped < 45:
+            label = "A valorar con mucha cautela"
+        elif score_clamped < 60:
+            label = "Aceptable / depende de experiencia"
+        elif score_clamped < 80:
             label = "Bueno"
-        elif score_clamped >= 50:
-            label = "Aceptable"
-        else:  # score_clamped >= 25
-            label = "A valorar"
+        else:
+            label = "Muy bueno"
     
     reasons = reasons[:3]
     

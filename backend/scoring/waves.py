@@ -39,78 +39,55 @@ WAVE_MATRIX: Dict[BoatType, Dict[SkillLevel, Tuple[float, float, float]]] = {
 
 def score_wave_height(hs_m: Optional[float], boat_type: BoatType, skill: SkillLevel, tp_s: Optional[float] = None) -> Tuple[float, str]:
     """
-    Penaliza por altura significativa de ola, considerando el periodo.
+    Penaliza por altura significativa de ola usando esquema piecewise (ok/soft_bad/hard_nogo).
     Retorna (penalización, razón)
     """
     if hs_m is None:
         return -8.0, "Sin datos de mar"
     
-    optimal, moderate, limit = WAVE_MATRIX[boat_type][skill]
+    ok, soft_bad, hard_nogo = WAVE_MATRIX[boat_type][skill]
     
-    # Si el periodo es largo (>=7s), es mar de fondo: más navegable que mar de viento
-    period_factor = 1.0
-    if tp_s and tp_s >= 7.0:
-        period_factor = 0.6  # Reduce penalización en 40% para mar de fondo
-    elif tp_s and tp_s >= 5.5:
-        period_factor = 0.8  # Reduce penalización en 20% para periodos moderados
-    
-    if hs_m <= optimal:
-        # Bonus gradual para olas más pequeñas: 0.3m mejor que 0.7m
-        # Máximo +8 puntos para olas muy pequeñas (0.2m), 0 puntos en el límite óptimo
-        bonus = 8.0 * (1.0 - hs_m / optimal)
-        return bonus, f"Ola {hs_m:.1f} m (favorable)"
-    elif hs_m <= moderate:
-        penalty = -25.0 * (hs_m - optimal) / (moderate - optimal) * period_factor
-        label = "moderada, navegable" if tp_s and tp_s >= 7.0 else "moderada"
-        return penalty, f"Ola {hs_m:.1f} m ({label})"
-    elif hs_m <= limit:
-        penalty = (-25.0 - 15.0 * (hs_m - moderate) / (limit - moderate)) * period_factor
-        label = "alta, mar de fondo" if tp_s and tp_s >= 7.0 else "alta"
-        return penalty, f"Ola {hs_m:.1f} m ({label})"
+    if hs_m <= ok:
+        # Sin penalización en zona OK
+        return 0.0, f"Ola {hs_m:.1f} m favorable"
+    elif hs_m <= soft_bad:
+        # Zona amarilla: hasta -15 puntos
+        t = (hs_m - ok) / (soft_bad - ok)
+        hs_pen = -round(t * 15)
+        return float(hs_pen), f"Ola {hs_m:.1f} m moderada"
     else:
-        return -40.0 * period_factor, f"Ola {hs_m:.1f} m (muy alta)"
+        # Zona roja: -15 a -25 según cercanía a hard_nogo
+        t = min(1.0, (hs_m - soft_bad) / (hard_nogo - soft_bad))
+        hs_pen = -(15 + round(t * 10))
+        return float(hs_pen), f"Ola {hs_m:.1f} m elevada"
 
 
 def score_wave_period(tp_s: Optional[float], hs_m: Optional[float] = None) -> Tuple[float, str]:
     """
-    Bonus/penalización por periodo de ola.
-    Si hay mar de fondo con ola baja, bonus adicional.
+    Ajuste por periodo de ola condicionado por Hs según nuevo algoritmo.
+    Tp >= 7s: +5 puntos, Tp < 5s: penalización condicionada por Hs
     Retorna (ajuste, razón)
     """
     if tp_s is None:
         return 0.0, ""
     
-    bonus = 0.0
-    reason = ""
-    
-    # Escalar el bonus por la altura de ola para evitar que periodos buenos
-    # hagan que olas altas puntúen mejor que olas bajas
-    # Factor de escala: 1.0 para olas ≤0.4m, reduce más agresivamente hasta 0.4 en 1.5m
-    scale_factor = 1.0
-    if hs_m is not None:
-        if hs_m <= 0.4:
-            scale_factor = 1.0
-        elif hs_m <= 1.5:
-            # Reducción más pronunciada: de 1.0 a 0.4
-            scale_factor = 1.0 - 0.6 * (hs_m - 0.4) / 1.1  # 1.0 → 0.4
-        else:
-            scale_factor = 0.4
-    
-    if tp_s >= 8.0:
-        bonus = 10.0 * scale_factor
-        reason = f"Tp {tp_s:.1f} s (mar de fondo suave, muy navegable)"
-        # Bonus adicional si además la ola es baja
-        if hs_m and hs_m <= 1.5:
-            bonus += 5.0 * scale_factor
-            reason = f"Tp {tp_s:.1f} s + ola {hs_m:.1f}m (condiciones ideales)"
-    elif tp_s >= 7.0:
-        bonus = 7.0 * scale_factor
-        reason = f"Tp {tp_s:.1f} s (mar de fondo)"
+    if tp_s >= 7.0:
+        # Mar de fondo
+        return 5.0, f"Tp {tp_s:.1f} s (mar de fondo)"
     elif tp_s < 5.0:
-        bonus = -6.0
-        reason = f"Tp {tp_s:.1f} s (mar corto, incómodo)"
-    
-    return bonus, reason
+        # Mar corto, penalización condicionada por ola
+        if hs_m is not None:
+            if hs_m <= 0.5:
+                return -3.0, f"Tp {tp_s:.1f} s (mar corto)"
+            elif hs_m <= 0.8:
+                return -5.0, f"Tp {tp_s:.1f} s (mar corto)"
+            else:
+                return -8.0, f"Tp {tp_s:.1f} s (mar corto)"
+        else:
+            return -5.0, f"Tp {tp_s:.1f} s (mar corto)"
+    else:
+        # Tp entre 5 y 7 segundos
+        return 0.0, ""
 
 
 def score_wave_wind_direction(wave_dir: Optional[float], wind_dir: Optional[float]) -> Tuple[float, str]:
