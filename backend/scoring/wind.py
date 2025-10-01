@@ -77,50 +77,56 @@ def score_wind(wind_kn: float, boat_type: BoatType, skill: SkillLevel) -> Tuple[
 
 def score_gust_factor(wind_kn: float, gust_kn: float, skill: SkillLevel, in_optimal_range: bool = False) -> Tuple[float, str]:
     """
-    Penaliza por factor de rachas con enfoque híbrido:
-    - Vientos bajos: usa umbrales absolutos (evita penalizar rachas pequeñas)
-    - Vientos óptimos/altos: usa ratio de rachas
+    Penaliza por rachas usando parche suave que reduce penalización con vientos bajos.
     Retorna (penalización, flag opcional)
     """
-    if wind_kn < 1.0:
+    if wind_kn <= 0:
         return 0.0, ""
     
-    gust_weights = {
+    gf = gust_kn / wind_kn
+    delta = max(0, gust_kn - wind_kn)
+    
+    # Componente relativa
+    if gf <= 1.2:
+        pen_rel = 0
+    elif gf <= 1.35:
+        pen_rel = -3
+    elif gf <= 1.5:
+        pen_rel = -6
+    else:
+        pen_rel = -10
+    
+    # Componente absoluta (tope -6)
+    pen_abs = -min(6, 0.6 * delta)
+    
+    # Peso por fuerza del viento (suaviza con poco viento)
+    # <6 kn casi sin castigo, 18 kn castigo completo
+    w = max(0, min(1, (wind_kn - 6) / 12))
+    
+    pen_raw = (pen_rel + pen_abs) * w
+    
+    # Peso por nivel
+    level_weights = {
         SkillLevel.PRINCIPIANTE: 1.0,
         SkillLevel.INTERMEDIO: 0.7,
         SkillLevel.AVANZADO: 0.5
     }
-    multiplier = gust_weights[skill]
-    gust_delta = gust_kn - wind_kn
+    level_w = level_weights[skill]
+    gust_pen = pen_raw * level_w
     
-    # Para vientos fuera del rango óptimo (bajos): usar umbrales absolutos
-    if not in_optimal_range:
-        # Rachas pequeñas en viento bajo: sin penalización
-        if gust_kn < 10.0 or gust_delta < 4.0:
-            return 0.0, ""
-        # Rachas moderadas
-        elif gust_kn < 14.0 or gust_delta < 6.0:
-            return -3.0 * multiplier, ""
-        # Rachas irregulares
-        elif gust_kn < 18.0 or gust_delta < 8.0:
-            return -6.0 * multiplier, f"Rachas irregulares ({gust_kn:.1f} kn)"
-        # Rachas fuertes (solo si realmente son fuertes)
-        else:
-            return -10.0 * multiplier, f"Rachas fuertes ({gust_kn:.1f} kn)"
+    # Cap por nivel
+    caps = {
+        SkillLevel.PRINCIPIANTE: -12,
+        SkillLevel.INTERMEDIO: -9,
+        SkillLevel.AVANZADO: -6
+    }
+    gust_pen = max(gust_pen, caps[skill])
     
-    # Para vientos en rango óptimo: usar ratio pero más permisivo
-    gust_factor = gust_kn / wind_kn
+    # Flag solo si rachas realmente fuertes
+    flag = ""
+    if gust_kn >= 20 and gf > 1.5:
+        flag = f"Rachas fuertes ({gust_kn:.1f} kn)"
+    elif gust_kn >= 16 and gf > 1.4:
+        flag = f"Rachas irregulares ({gust_kn:.1f} kn)"
     
-    if gust_factor <= 1.25:
-        return 0.0, ""
-    elif gust_factor <= 1.4:
-        return -5.0 * multiplier, ""
-    elif gust_factor <= 1.6:
-        penalty = -10.0 * multiplier
-        flag = f"Rachas irregulares ({gust_kn:.1f} kn)" if gust_kn >= 16.0 else ""
-        return penalty, flag
-    else:
-        # Solo penalizar fuerte si las rachas son realmente peligrosas
-        penalty = -20.0 * multiplier if gust_kn >= 22.0 else -15.0 * multiplier
-        flag = f"Rachas fuertes ({gust_kn:.1f} kn)" if gust_kn >= 18.0 else f"Rachas irregulares ({gust_kn:.1f} kn)"
-        return penalty, flag
+    return gust_pen, flag

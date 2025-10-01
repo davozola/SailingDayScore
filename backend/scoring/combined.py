@@ -117,6 +117,9 @@ def calculate_score(metrics: RawMetrics, boat_type: BoatType, skill: SkillLevel)
         for reason in no_go_reasons:
             flags.append(f"⚠️ NO-GO: {reason}")
     else:
+        # Suelo suave para evitar castigo injusto por rachas con poco viento
+        total_score = max(total_score, 35)
+        
         # Clamp score entre 0 y 100
         score_clamped = max(0, min(100, int(round(total_score))))
         

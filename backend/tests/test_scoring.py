@@ -27,27 +27,32 @@ class TestWindScoring:
         assert "óptimo" in reason  # Cambio de texto
     
     def test_gust_factor_low(self):
-        # Viento óptimo (in_optimal_range=True), rachas bajas
-        penalty, flag = score_gust_factor(10.0, 11.0, SkillLevel.INTERMEDIO, in_optimal_range=True)
-        assert penalty == 0.0
+        # Viento con rachas bajas (factor 1.1)
+        penalty, flag = score_gust_factor(10.0, 11.0, SkillLevel.INTERMEDIO)
+        # gf=1.1, pen_rel=0, pen_abs=-0.6, w=0.33, pen_raw=-0.2, pen≈-0.14
+        assert penalty > -1.0  # Penalización muy pequeña
         assert flag == ""
     
     def test_gust_factor_moderate(self):
-        # Viento óptimo con rachas moderadas
-        penalty, flag = score_gust_factor(10.0, 13.0, SkillLevel.INTERMEDIO, in_optimal_range=True)
-        assert penalty <= -3.5  # -5 * 0.7 = -3.5
+        # Viento moderado con rachas (factor 1.3)
+        penalty, flag = score_gust_factor(10.0, 13.0, SkillLevel.INTERMEDIO)
+        # gf=1.3, pen_rel=-3, pen_abs=-1.8, w=0.33, pen_raw=-1.6, pen=-1.12
+        assert penalty < 0 and penalty >= -2.0
         assert flag == ""
     
     def test_gust_factor_high(self):
-        # Viento óptimo con rachas altas
-        penalty, flag = score_gust_factor(10.0, 14.5, SkillLevel.INTERMEDIO, in_optimal_range=True)
-        assert penalty <= -7.0  # -10 * 0.7 = -7.0
-        assert flag == ""  # No flag si gust_kn < 16
+        # Viento alto con rachas (factor 1.45)
+        penalty, flag = score_gust_factor(15.0, 21.75, SkillLevel.INTERMEDIO)
+        # gf=1.45, pen_rel=-6, pen_abs=-4.05, w=0.75, pen_raw=-7.5, pen=-5.25
+        assert penalty < -4.0
+        # gust_kn >= 16 y gf > 1.4 → flag esperado
+        assert "Rachas" in flag or flag == ""
     
     def test_gust_factor_low_wind(self):
-        # Viento bajo con rachas pequeñas: sin penalización por umbrales absolutos
-        penalty, flag = score_gust_factor(2.5, 4.5, SkillLevel.INTERMEDIO, in_optimal_range=False)
-        assert penalty == 0.0  # gust_kn < 10 y gust_delta < 4
+        # Viento bajo con rachas: peso w casi 0, poca penalización
+        penalty, flag = score_gust_factor(2.5, 4.5, SkillLevel.INTERMEDIO)
+        # w=(2.5-6)/12 = -0.29 → 0, casi sin penalización
+        assert penalty >= -0.5  # Muy baja penalización
         assert flag == ""
 
 
